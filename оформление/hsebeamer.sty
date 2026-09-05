@@ -1,0 +1,225 @@
+% ===========================================================================
+%  Оформление слайдов курса «Программирование на Python для бизнес-аналитики»
+%  ВШБ НИУ ВШЭ · БАЦРФ · 2026/2027
+%
+%  Общий стиль на все двенадцать лекций. Подключается из папки лекции:
+%      TEXINPUTS=../../оформление//: latexmk -xelatex Л1-слайды.tex
+%  или просто `make` — Makefile лекции это делает сам.
+%
+%  Движок только XeLaTeX или LuaLaTeX: нужны fontspec и polyglossia.
+% ===========================================================================
+\ProvidesPackage{hsebeamer}[2026/08/30 Оформление лекций курса Python для БА]
+
+% --- Шрифты -----------------------------------------------------------------
+% Fira Sans и Fira Mono идут в комплекте TeX Live, ставить ничего не нужно.
+% Имя семейства при Extension=.otf — это префикс ФАЙЛА (FiraSans), а не
+% человеческое название («Fira Sans»). С пробелом fontspec их не найдёт.
+\RequirePackage{fontspec}
+\setmainfont{FiraSans}[
+  Extension      = .otf,
+  UprightFont    = *-Book,
+  BoldFont       = *-SemiBold,
+  ItalicFont     = *-BookItalic,
+  BoldItalicFont = *-SemiBoldItalic,
+  Ligatures      = TeX,
+]
+\setsansfont{FiraSans}[
+  Extension      = .otf,
+  UprightFont    = *-Book,
+  BoldFont       = *-SemiBold,
+  ItalicFont     = *-BookItalic,
+  BoldItalicFont = *-SemiBoldItalic,
+  Ligatures      = TeX,
+]
+% У моноширинного Ligatures=TeX намеренно НЕТ: иначе `--period` в коде
+% превратится в тире, и студент не сможет повторить команду.
+\setmonofont{FiraMono}[
+  Extension   = .otf,
+  UprightFont = *-Regular,
+  BoldFont    = *-Bold,
+  Scale       = 0.86,
+]
+% Fira Mono содержит кириллицу, но не объявляет OpenType-скрипт `cyrl`,
+% поэтому polyglossia её отвергает. Указываем шрифт явно.
+\newfontfamily\cyrillicfonttt{FiraMono}[
+  Extension   = .otf,
+  UprightFont = *-Regular,
+  BoldFont    = *-Bold,
+  Scale       = 0.86,
+]
+\newfontfamily\FiraLight{FiraSans}[Extension=.otf,UprightFont=*-Light,Ligatures=TeX]
+
+% --- Язык -------------------------------------------------------------------
+% polyglossia грузится ПОСЛЕ шрифтов — иначе проверка на кириллицу
+% сработает по ещё не заданному семейству и упадёт на nullfont.
+\RequirePackage{polyglossia}
+\setmainlanguage{russian}
+\setotherlanguage{english}
+
+\RequirePackage{microtype}
+\RequirePackage{booktabs}
+\RequirePackage{tabularx}
+\RequirePackage{array}
+\RequirePackage{adjustbox}
+\RequirePackage{tcolorbox}
+\RequirePackage{tikz}
+\RequirePackage{qrcode}
+\RequirePackage{listings}
+\usetikzlibrary{positioning, arrows.meta, shapes.geometric, fit, backgrounds}
+
+% --- Палитра ----------------------------------------------------------------
+% Один акцентный цвет и два служебных. Ничего больше: на проекторе всё,
+% что ярче, читается хуже, а не лучше.
+\definecolor{hseblue}{HTML}{102A63}   % основной, заголовки
+\definecolor{hseaccent}{HTML}{C1272D} % акцент, только на важном
+\definecolor{hseink}{HTML}{1D2129}    % основной текст
+\definecolor{hsegrey}{HTML}{6B7280}   % вторичный текст
+\definecolor{hsepale}{HTML}{EEF1F6}   % заливка блоков
+\definecolor{hsegood}{HTML}{2A9D8F}   % «да», «работает»
+\definecolor{hsebad}{HTML}{C1272D}    % «нет», «ломается»
+
+% --- Базовая тема -----------------------------------------------------------
+\usetheme{default}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamersize{text margin left=1.2em, text margin right=1.2em}
+\setbeamertemplate{itemize items}[circle]
+\setbeamertemplate{itemize subitem}{--}
+
+\setbeamercolor{normal text}{fg=hseink}
+\setbeamercolor{frametitle}{fg=hseblue}
+\setbeamercolor{framesubtitle}{fg=hsegrey}
+\setbeamercolor{structure}{fg=hseblue}
+\setbeamercolor{itemize item}{fg=hseblue}
+\setbeamercolor{itemize subitem}{fg=hsegrey}
+\setbeamercolor{alerted text}{fg=hseaccent}
+
+\setbeamerfont{frametitle}{size=\Large, series=\bfseries}
+\setbeamerfont{framesubtitle}{size=\normalsize, series=\mdseries}
+\setbeamerfont{itemize/enumerate body}{size=\normalsize}
+\setbeamerfont{itemize/enumerate subbody}{size=\small}
+
+\setbeamertemplate{frametitle}{%
+  \vspace{0.55em}%
+  \usebeamerfont{frametitle}\usebeamercolor[fg]{frametitle}\insertframetitle%
+  \ifx\insertframesubtitle\@empty\else
+    \par\vspace{0.15em}%
+    \usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}\insertframesubtitle%
+  \fi
+  \par\vspace{0.35em}%
+}
+
+% Подвал: тема курса слева, номер справа. На титуле и разделителях скрыт.
+\setbeamertemplate{footline}{%
+  \ifnum\thepage>1\relax
+    \hbox{\begin{beamercolorbox}[wd=\paperwidth,ht=2.4ex,dp=1.6ex,leftskip=1.1em,rightskip=1.1em]{}%
+      {\footnotesize\color{hsegrey}\hselecture}\hfill
+      {\footnotesize\color{hsegrey}\insertframenumber}%
+    \end{beamercolorbox}}%
+  \fi
+}
+% Заполняется в преамбуле лекции: \renewcommand{\hselecture}{Л1 · Профессия…}
+\newcommand{\hselecture}{}
+
+% --- Титульный слайд --------------------------------------------------------
+\newcommand{\hsetitlepage}[4]{%
+  % #1 номер и название лекции, #2 дата, #3 курс, #4 автор
+  \begin{frame}[plain]
+    \vspace{1.1cm}
+    {\color{hsegrey}\large #3\par}
+    \vspace{0.9cm}
+    {\color{hseblue}\fontsize{28}{34}\selectfont\bfseries #1\par}
+    \vspace{0.9cm}
+    {\color{hsegrey}\large #4 \quad·\quad #2\par}
+    \vfill
+  \end{frame}%
+}
+
+% --- Слайд-разделитель между блоками ---------------------------------------
+\newcommand{\hsesection}[2][]{%
+  \begin{frame}[plain]
+    \vfill
+    \begin{center}
+      {\color{hseblue}\fontsize{26}{32}\selectfont\bfseries #2\par}
+      \ifx\relax#1\relax\else\vspace{0.5em}{\color{hsegrey}\large #1\par}\fi
+    \end{center}
+    \vfill
+  \end{frame}%
+}
+
+% --- Крупное утверждение на весь слайд -------------------------------------
+\newcommand{\hsestatement}[1]{%
+  \begin{frame}[plain]
+    \vfill
+    \begin{center}
+      \begin{minipage}{0.86\textwidth}
+        \centering{\color{hseink}\fontsize{21}{28}\selectfont #1\par}
+      \end{minipage}
+    \end{center}
+    \vfill
+  \end{frame}%
+}
+
+% --- Блок-врезка ------------------------------------------------------------
+% Через tcolorbox, а не \colorbox: аргумент макроса нельзя разорвать между
+% \begin и \end окружения — TeX ругается «Extra }, or forgotten \endgroup».
+% Необязательный аргумент пробрасывается как опции tcolorbox.
+\newtcolorbox{hsebox}[1][]{%
+  colback   = hsepale,
+  colframe  = hsepale,
+  boxrule   = 0pt,
+  arc       = 3pt,
+  left      = 1.1em, right = 1.1em, top = 0.9em, bottom = 0.9em,
+  width     = 0.95\textwidth,
+  center,
+  halign    = flush left,
+  #1
+}
+
+% --- Пометки в тексте -------------------------------------------------------
+\newcommand{\good}[1]{\textcolor{hsegood}{#1}}
+\newcommand{\bad}[1]{\textcolor{hsebad}{#1}}
+\newcommand{\muted}[1]{\textcolor{hsegrey}{#1}}
+\newcommand{\keyword}[1]{\textcolor{hseaccent}{\bfseries #1}}
+% Ссылка на тему курса: \tema{4} → «тема 04»
+\newcommand{\tema}[1]{\textcolor{hsegrey}{\footnotesize тема~\ifnum#1<10 0\fi#1}}
+
+% --- Код --------------------------------------------------------------------
+\lstdefinestyle{hse}{
+  basicstyle       = \ttfamily\small,
+  keywordstyle     = \color{hseblue}\bfseries,
+  commentstyle     = \color{hsegrey}\itshape,
+  stringstyle      = \color{hsegood},
+  numbers          = none,
+  showstringspaces = false,
+  breaklines       = true,
+  frame            = none,
+  backgroundcolor  = \color{hsepale},
+  xleftmargin      = 0.8em,
+  xrightmargin     = 0.8em,
+  framexleftmargin = 0.8em,
+  aboveskip        = 0.8em,
+  belowskip        = 0.8em,
+  extendedchars    = true,
+  literate         = {~}{{\textasciitilde}}1,
+  % Без fullflexible+keepspaces listings склеивает слова в кириллических
+  % комментариях: пробел после не-ASCII символа он считает частью токена
+  % и выбрасывает. Проверено на Л2 — «# просим диапазон» превращалось
+  % в «# просимдиапазон».
+  columns          = fullflexible,
+  keepspaces       = true,
+}
+\lstset{style=hse, language=Python}
+% ВНИМАНИЕ на будущее. Кириллица внутри листинга безопасна только в
+% комментариях и строках. Если поставить её вплотную к «неалфавитному»
+% символу (`/`, `-`, псевдографика дерева `├──`), listings выведет эти
+% символы в конец строки: `feature/только-платящие` станет
+% `featureтолькоплатящие/-`. Поэтому имена веток и файлов в листингах —
+% латиницей, а дерево проекта рисуется таблицей или tikz, не листингом.
+
+% --- Таблицы ----------------------------------------------------------------
+\renewcommand{\arraystretch}{1.15}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+\endinput

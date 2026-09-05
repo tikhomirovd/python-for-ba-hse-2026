@@ -1,0 +1,29 @@
+# Общие правила сборки слайдов. Подключается из Makefile лекции:
+#
+#     TEX  := Л1-слайды
+#     include ../../оформление/Makefile.common
+#
+# Требуется XeLaTeX из MacTeX или TeX Live. Шрифты Fira идут в комплекте,
+# ставить ничего не нужно.
+
+STYLE_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
+export TEXINPUTS := $(STYLE_DIR)//:$(TEXINPUTS)
+
+LATEXMK := latexmk -xelatex -interaction=nonstopmode -halt-on-error -file-line-error
+
+.PHONY: all watch clean distclean
+
+all: $(TEX).pdf
+
+$(TEX).pdf: $(TEX).tex $(STYLE_DIR)hsebeamer.sty
+	$(LATEXMK) $(TEX).tex
+
+# Пересобирать на каждое сохранение — удобно, когда правишь слайды.
+watch:
+	$(LATEXMK) -pvc $(TEX).tex
+
+clean:
+	latexmk -c $(TEX).tex
+
+distclean:
+	latexmk -C $(TEX).tex
