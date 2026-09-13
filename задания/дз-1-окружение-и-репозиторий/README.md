@@ -41,11 +41,13 @@ git pull
 uv sync
 uv run nbstripout --install
 git config --global core.quotepath false
+git config --global pull.rebase false
 ```
 
 - `uv sync` ставит ровно те версии библиотек, что записаны в `uv.lock`.
 - `nbstripout` при каждом коммите срезает из ноутбука выводы ячеек: в репозиторий уходит чистый код и ваш текст, а на экране всё остаётся как было. Если перенесёте папку проекта в другое место, `git add` ноутбука начнёт падать с `clean filter 'nbstripout' failed` — повторите `uv run nbstripout --install`.
 - `core.quotepath false` — чтобы git показывал русские имена файлов (`ДЕКЛАРАЦИЯ-ИИ.md`) буквами, а не кодами.
+- `pull.rebase false` — чтобы `git pull` сливал изменения, а не падал, если вы что-то правили и в браузере на GitHub, и у себя.
 
 ### 3. Доступ к базе
 
@@ -54,7 +56,11 @@ git config --global core.quotepath false
 ### 4. Стартовый ноутбук — в `main`
 
 1. Откройте [hw1.ipynb](hw1.ipynb) на GitHub и нажмите кнопку **Download raw file** (стрелка вниз справа над файлом).
-2. Сохраните файл в папку `notebooks` своего `prime-monitor` под именем `hw1.ipynb`. **Пока не открывайте и не запускайте.**
+2. Сохраните файл в папку `notebooks` своего `prime-monitor` под именем `hw1.ipynb`. **Пока не открывайте и не запускайте.** Если с браузером не выходит — из корня `prime-monitor` одной командой, одинаково на macOS и Windows (в PowerShell — именно `curl.exe`):
+
+   ```
+   curl.exe -L -o notebooks/hw1.ipynb "https://raw.githubusercontent.com/tikhomirovd/python-for-ba-hse-2026/master/%D0%B7%D0%B0%D0%B4%D0%B0%D0%BD%D0%B8%D1%8F/%D0%B4%D0%B7-1-%D0%BE%D0%BA%D1%80%D1%83%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B8-%D1%80%D0%B5%D0%BF%D0%BE%D0%B7%D0%B8%D1%82%D0%BE%D1%80%D0%B8%D0%B9/hw1.ipynb"
+   ```
 3. Положите нетронутый стартер в `main`, потом заведите ветку для работы:
 
 ```
@@ -69,7 +75,7 @@ git switch -c feature/hw1
 
 ### 5. Работа
 
-Из корня `prime-monitor` запустите `uv run jupyter lab` и откройте `notebooks/hw1.ipynb`. JupyterLab запускается **именно из `prime-monitor`**, а не из клона репозитория курса: там нет пакета `prime` и вашего `.env`. Этот терминал останется занят, поэтому git-команды дальше вводите во втором окне терминала, тоже в папке `prime-monitor` (или **File → New → Terminal** в самом JupyterLab).
+Из корня `prime-monitor` запустите `uv run jupyter lab` и откройте `notebooks/hw1.ipynb`. **Работаете в VS Code** — File → Open Folder → папка `prime-monitor`, откройте `notebooks/hw1.ipynb`, справа сверху Select Kernel → Python Environments → `.venv` из `prime-monitor`; вместо Restart Kernel and Run All Cells — кнопки Restart и Run All над ноутбуком. JupyterLab запускается **именно из `prime-monitor`**, а не из клона репозитория курса: там нет пакета `prime` и вашего `.env`. Этот терминал останется занят, поэтому git-команды дальше вводите во втором окне терминала, тоже в папке `prime-monitor` (или **File → New → Terminal** в самом JupyterLab).
 
 Дальше всё написано в самом ноутбуке. Он в четырёх частях:
 
@@ -147,7 +153,7 @@ git push -u origin feature/hw1
 |---|---|
 | числа верные и получены кодом в ноутбуке, а не вписаны руками | 0,4 |
 | вывод следует из чисел, названо, чего расчёт не доказывает | 0,3 |
-| код исследования выполняется у меня целиком, в том числе на контрольном участке | 0,2 |
+| код исследования выполняется у меня целиком, в том числе на контрольном участке. Ошибка в коде исследования снимает только эти 0,2 и не трогает основную часть | 0,2 |
 | изложено по схеме: вопрос → как проверяли → что получилось → что это значит | 0,1 |
 
 **Итоговая оценка = сумма основной части × 0,4 + баллы за исследования**, не больше 10.
@@ -201,13 +207,20 @@ git push -u origin feature/hw1
 
 | Что видите | Что случилось и что делать |
 |---|---|
-| `Пакет prime не найден` | JupyterLab запущен не из `prime-monitor`. Закройте его, перейдите в корень `prime-monitor`, `uv run jupyter lab` |
+| `Пакет prime не найден` | ноутбук запущен не в окружении `prime-monitor`. JupyterLab — закройте его, перейдите в корень `prime-monitor`, `uv run jupyter lab`. VS Code — Select Kernel → `.venv` из папки `prime-monitor` |
 | `Не найдена переменная PRIME_DSN` | нет `.env` в корне `prime-monitor` или в нём нет строки `PRIME_DSN=` — [памятка](../../справка/подключение-к-базе.md) |
 | подключение висит, `timed out` | сеть режет порт 5432 — замените в `.env` `:5432` на `:443` |
+| `server closed the connection unexpectedly`, `terminating connection` | соединение оборвалось (сон ноутбука, смена сети) — запустите заново ячейки 1.2 и 1.5 |
 | `NameError: name 'rows' is not defined` (или другое имя) | какая-то ячейка выше не выполнилась. Найдите сверху первую ячейку с красной ошибкой, исправьте её и сделайте **Restart Kernel and Run All Cells** |
 | `❌ не решена` в итоге | функция вернула `None`: в ней остался `...` или забыт `return` |
 | `❌ нужен …, сейчас …` в итоге | ответ записан не в том формате: сравните с «Форматом ответа» у задачи |
 | `clean filter 'nbstripout' failed` при `git add` | папку проекта перенесли — `uv run nbstripout --install` |
+| `pathspec 'notebooks/hw1.ipynb' did not match any files` | файл лёг не туда или называется иначе (`hw1 (1).ipynb`, `hw1.ipynb.txt`): посмотрите `ls notebooks` (в PowerShell — `dir notebooks`) и переименуйте |
+| `Need to specify how to reconcile divergent branches` | `git pull --no-rebase`, затем снова `git push`. README и декларацию дальше правьте у себя, а не в браузере на GitHub |
+| `unresolved conflict` или `cannot switch branch while merging` | остался недоделанный конфликт из Git-практикума: `git merge --abort` |
+| `a branch named 'feature/hw1' already exists` | ветка уже есть — `git switch feature/hw1` |
+| отправили ссылку вида `…/pull/new/feature/hw1` | это ещё не pull request: откройте её, нажмите **Create pull request** и отправьте в `/submit` адрес открывшейся страницы |
+| репозиторий сделан кнопкой **Fork**, а не **Use this template** | fork нельзя сделать приватным, и pull request уйдёт в шаблон курса. Создайте на GitHub пустой репозиторий `prime-monitor` (без README и .gitignore), в папке проекта выполните `git remote set-url origin git@github.com:ВАШ_ЛОГИН_НА_GITHUB/prime-monitor.git` и `git push -u origin main`; fork после этого удалите |
 | нажали **Merge** по ошибке | если работа уже готова — пришлите в `/submit` ссылку на этот pull request. Если продолжаете работу — пушьте в ту же ветку, откройте новый pull request `feature/hw1` → `main` и пришлите его ссылку |
 | `git@github.com: Permission denied (publickey)` | GitHub вас не узнал — [памятка по git](../../справка/git-и-github.md), раздел «Если что-то пошло не так» |
 | `port 22: Operation timed out` | сеть режет порт 22 — [памятка по git](../../справка/git-и-github.md), раздел 5 |
