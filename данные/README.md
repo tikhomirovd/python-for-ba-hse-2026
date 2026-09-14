@@ -49,6 +49,139 @@
 
 ### Как это связано
 
+```mermaid
+erDiagram
+    clients ||--o{ subscriptions : "владеет"
+    partners ||--o{ subscriptions : "продал"
+    subscriptions }o--|{ tariffs : "tariff_id, цена по дате платежа"
+    subscriptions ||--o{ subscription_members : "поделились"
+    clients ||--o{ subscription_members : "участвует"
+    subscriptions ||--o{ payments : "списания"
+    clients ||--o{ service_usage : "пользуется"
+    services ||--o{ service_usage : "сервис"
+    clients ||--o{ transactions : "покупает"
+    services |o--o{ transactions : "сервис"
+    transactions ||--o| cashback : "бонусы"
+    clients ||--o{ support_tickets : "обращается"
+    tariffs }|..o{ services : "доступен с тарифа"
+    clients }o..o{ marketing_spend : "канал и дата, не ключ"
+
+    clients {
+        uuid client_id PK
+        timestamptz registered_at
+        integer region_code
+        text time_zone
+        integer birth_year
+        text acquisition_channel "бывает NULL"
+        integer kyc_level
+    }
+    subscriptions {
+        uuid subscription_id PK
+        uuid owner_client_id FK "владелец и плательщик"
+        integer tariff_id FK
+        timestamptz started_at
+        timestamptz ended_at "NULL — действует"
+        boolean is_trial
+        integer partner_id FK
+        text cancel_reason
+    }
+    subscription_members {
+        uuid subscription_id FK
+        uuid client_id FK "владельца здесь нет"
+        timestamptz joined_at
+        timestamptz left_at "NULL — ещё пользуется"
+    }
+    tariffs {
+        integer tariff_id "не уникален: история цен"
+        text tariff_name
+        numeric monthly_fee
+        numeric cashback_rate
+        integer share_slots
+        date valid_from
+        date valid_to
+    }
+    payments {
+        uuid payment_id PK
+        uuid subscription_id FK
+        timestamptz paid_at
+        numeric amount
+        text status "выручка — только success"
+        text payment_method
+    }
+    partners {
+        integer partner_id PK
+        text partner_name
+        text partner_type
+    }
+    services {
+        integer service_id PK
+        text service_name
+        text category
+        integer available_from_tariff FK
+    }
+    service_usage {
+        uuid usage_id PK
+        uuid client_id FK
+        integer service_id FK
+        timestamptz started_at
+        timestamptz ended_at
+        text device_type
+    }
+    transactions {
+        uuid transaction_id PK
+        uuid client_id FK
+        timestamptz occurred_at
+        numeric amount
+        integer mcc_code
+        integer service_id FK "может быть NULL"
+        text channel
+        text status
+    }
+    cashback {
+        uuid cashback_id PK
+        uuid transaction_id FK
+        timestamptz accrued_at
+        numeric bonus_amount
+        numeric rate_applied
+    }
+    marketing_spend {
+        integer spend_id PK
+        text channel
+        date spend_date
+        numeric amount
+        bigint impressions
+        bigint clicks
+    }
+    support_tickets {
+        uuid ticket_id PK
+        uuid client_id FK
+        timestamptz created_at
+        timestamptz resolved_at "NULL — ещё в работе"
+        text category
+        text text
+    }
+    assignments {
+        text login PK
+        text table_name
+        text segment_column
+        text segment
+        date period_start
+        date period_end
+    }
+```
+
+**Как читать концы линий.** `||` — ровно одна строка, `o|` — ноль или одна, `o{` — ноль или много, `|{` — одна или много. Например, `subscriptions ||--o{ payments` читается так: каждый платёж относится ровно к одной подписке, а у подписки платежей ноль или много. Сплошная линия — связь по ключу, пунктирная — сопоставление не по ключу: `marketing_spend` сходится с клиентами по каналу и дате, `services` с тарифами — по номеру минимального тарифа.
+
+Два места на схеме стоит разглядеть отдельно:
+
+* **`subscriptions }o--|{ tariffs`.** У подписки не одна строка справочника, а одна или несколько: `tariff_id` в `tariffs` повторяется, потому что у цены есть история. Какая строка нужна, решает дата платежа — см. [`tariffs`](#tariffs).
+* **`subscription_members` висит сразу на двух таблицах**, на `subscriptions` и на `clients`, и ключа у неё нет. Это та самая таблица, через которую получается двойной счёт.
+
+**Ключи на схеме — логические.** Уникальность идентификаторов (`client_id`, `payment_id` и других с пометкой PK) база проверяет. А связи между таблицами — нет: внешние ключи в схеме не объявлены, и строку, которая ссылается на несуществующую подписку, база не остановит. Сверять связи при соединении — ваша работа.
+
+<details>
+<summary>Та же схема текстом — если диаграмма не отрисовалась</summary>
+
 ```
 clients ──┬─< subscriptions >── tariffs        (по tariff_id и дате платежа)
           │         │      └──── partners
@@ -61,6 +194,8 @@ clients ──┬─< subscriptions >── tariffs        (по tariff_id и д
 marketing_spend — ни с чем не связана ключом, сходится с clients
                   по каналу и дате
 ```
+
+</details>
 
 ---
 
