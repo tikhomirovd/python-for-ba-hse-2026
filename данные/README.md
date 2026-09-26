@@ -43,7 +43,7 @@
 | [`cashback`](#cashback) | 2 204 058 | начисления бонусов за покупки |
 | [`marketing_spend`](#marketing_spend) | 3 606 | расходы на привлечение по дням и каналам |
 | [`support_tickets`](#support_tickets) | 150 000 | обращения в поддержку |
-| [`assignments`](#assignments) | 57 | ваш участок (персональный срез) для ДЗ-1 |
+| [`assignments`](#assignments) | 57 | ваш участок (персональный срез) для ДЗ-1 и сегмент для ДЗ-2 |
 
 Обращаться к таблицам нужно с префиксом схемы: `prime.payments`, а не `payments`.
 
@@ -167,6 +167,7 @@ erDiagram
         text segment
         date period_start
         date period_end
+        text client_filter
     }
 ```
 
@@ -379,6 +380,7 @@ marketing_spend — ни с чем не связана ключом, сходи�
 | `table_name` | `text` | с какой таблицей работаете |
 | `segment_column`, `segment` | `text` | какой срез берёте |
 | `period_start`, `period_end` | `date` | за какой период |
+| `client_filter` | `text` | ваш сегмент для хвоста С4 и ДЗ-2 — клиенты, которые встречаются в вашей таблице с вашим признаком за ваш период. Готовое условие: вставляется в `where` как есть |
 
 Своя строка достаётся так:
 
