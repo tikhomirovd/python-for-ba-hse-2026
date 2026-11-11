@@ -22,6 +22,27 @@
 
 - Практикум: постановка пилота на данных ПРАЙМ — гипотеза, экспериментальная единица, метрики, разбиение на группы
 
+## Что подготовить заранее
+
+К **семинару** — окружение `pilot/` с библиотекой HypEx 1.0.7. Оно отдельное от основного окружения `prime-monitor`: HypEx 1.0.7 работает только с pandas 2.2, а в `prime-monitor` стоит pandas 3. Подготовка одна на оба семинара — 07 и 08 идут подряд в один день.
+
+1. Скачайте папку [`семинар/pilot/`](семинар/pilot/) — пять файлов — в корень своего `prime-monitor`, рядом с `src/` и `.env`. Из корня `prime-monitor` это одна команда.
+
+   macOS и Linux:
+
+   ```bash
+   mkdir -p pilot && for f in .python-version pyproject.toml uv.lock setup-pilot.sh setup-pilot.ps1; do curl -fsSL -o "pilot/$f" "https://raw.githubusercontent.com/tikhomirovd/python-for-ba-hse-2026/master/07-%D0%BF%D0%B8%D0%BB%D0%BE%D1%82%D1%8B-%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0/%D1%81%D0%B5%D0%BC%D0%B8%D0%BD%D0%B0%D1%80/pilot/$f"; done
+   ```
+
+   Windows, PowerShell:
+
+   ```powershell
+   mkdir pilot -Force; foreach ($f in ".python-version","pyproject.toml","uv.lock","setup-pilot.sh","setup-pilot.ps1") { Invoke-WebRequest "https://raw.githubusercontent.com/tikhomirovd/python-for-ba-hse-2026/master/07-%D0%BF%D0%B8%D0%BB%D0%BE%D1%82%D1%8B-%D0%BF%D0%BE%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0/%D1%81%D0%B5%D0%BC%D0%B8%D0%BD%D0%B0%D1%80/pilot/$f" -OutFile "pilot\$f" }
+   ```
+
+2. Запустите установку из корня `prime-monitor`: на macOS и Linux — `bash pilot/setup-pilot.sh`, на Windows — `powershell -ExecutionPolicy Bypass -File pilot\setup-pilot.ps1`. Скрипт ставит пакеты в `pilot/.venv`, проверяет версии и подключение к базе. Если он пишет «НЕТ» или «ВНИМАНИЕ», исправьте то, что он называет, до пары.
+3. Скачайте ноутбуки [С7](семинар/С7-дизайн-пилота.ipynb) и [С8](../08-анализ-пилота/семинар/С8-анализ-пилота.ipynb) в `notebooks/` своего репозитория. JupyterLab запускайте из корня `prime-monitor` командой `uv run --project pilot jupyter lab`. В VS Code выберите ядро `pilot/.venv`.
+
 ## Материалы
 
 - [Трансляция занятия](https://jazz.sberbank.ru/sber-ygfv0m?psw=OBRaEUBTFxwBBF0HH0cADw4OQA) — включается на время пары; посещаемость отмечается в аудитории
