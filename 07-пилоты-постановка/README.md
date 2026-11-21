@@ -87,7 +87,7 @@ uv run --project pilot jupyter lab
 
 ## Материалы
 
-- [Трансляция занятия](https://jazz.sberbank.ru/sber-ygfv0m?psw=OBRaEUBTFxwBBF0HH0cADw4OQA) — включается на время пары; посещаемость отмечается в аудитории
+- [Трансляция занятия](https://jazz.sberbank.ru/sber-6anbos?psw=OAIOUxkUDQwbEglFRgAaHxQYFA) — включается на время пары; посещаемость отмечается в аудитории
 - [`лекция/`](лекция/) — слайды лекции
 - [`семинар/`](семинар/) — рабочий ноутбук семинара и окружение `pilot/`
 

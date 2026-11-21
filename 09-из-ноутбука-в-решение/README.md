@@ -58,7 +58,7 @@ uv run python -c "import pandas, prime; print('готово, pandas', pandas.__v
 
 ## Материалы
 
-- [Трансляция занятия](https://jazz.sberbank.ru/sber-ygfv0m?psw=OBRaEUBTFxwBBF0HH0cADw4OQA) — включается на время пары; посещаемость отмечается в аудитории
+- [Трансляция занятия](https://jazz.sberbank.ru/sber-6anbos?psw=OAIOUxkUDQwbEglFRgAaHxQYFA) — включается на время пары; посещаемость отмечается в аудитории
 - [Практикум лекции](лекция/Л9-практикум.md) — все шаги с кодом и ожидаемым выводом
 - [Репозиторий практикума](https://github.com/tikhomirovd/prime-l9-workshop) — по тегу на каждый шаг
 - [`семинар/`](семинар/) — рабочий ноутбук семинара
