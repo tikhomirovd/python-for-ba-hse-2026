@@ -59,7 +59,9 @@ h1 em{font-family:var(--serif);font-weight:400;letter-spacing:-.077em;color:var(
 .node{position:absolute;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:currentColor;border:2px solid var(--night);box-shadow:0 0 0 1px currentColor}
 .node.join{width:16px;height:16px;border:3px solid currentColor;background:var(--night);box-shadow:0 0 0 2px var(--night)}
 .plot-label{position:absolute;transform:translateX(-50%);font:11px/1 var(--mono);color:var(--color,#ccd6e7);white-space:nowrap;letter-spacing:.015em}
-.plot-label.pr{background:var(--night);border:1px solid currentColor;border-radius:4px;padding:3px 5px;transform:translate(-50%,-115%)}
+.plot-label.pr{background:var(--night);border:1px solid currentColor;border-radius:4px;padding:3px 5px;transform:translate(10px,-50%)}
+.fork-tag{position:absolute;transform:translate(-50%,calc(-100% - 12px));padding:3px 7px;border-radius:5px;background:var(--amber);color:var(--night);font:600 12px/1.2 var(--sans);white-space:nowrap}
+.fork-tag::after{content:"";position:absolute;left:50%;top:100%;height:8px;border-left:1px solid var(--amber)}
 .map-footer{border-top:1px solid #d4dff92a;padding:17px 32px;justify-content:space-between;gap:20px;background:#ffffff05}
 .map-note{max-width:690px}.map-note strong{font-size:16px;font-weight:600;display:block;margin-bottom:3px}
 .map-note p{color:#c8d3e5;font-size:15px;line-height:1.4}
@@ -89,6 +91,19 @@ h1 em{font-family:var(--serif);font-weight:400;letter-spacing:-.077em;color:var(
 .feedback{margin-top:18px;border-top:1px solid #bac5d8;padding-top:13px;font-size:16px}
 .feedback strong{display:block;margin-bottom:4px}
 .feedback p+p{margin-top:10px}
+.stack-map .map-header{padding:18px 20px 4px}
+.stack-map h3{font-size:21px;letter-spacing:-.03em}
+.stack-map .map-body{grid-template-columns:152px minmax(0,1fr);padding:0 20px}
+.stack-map .plot,.stack-map .lanes{height:164px}
+.stack-map figcaption{border-top:1px solid #ffffff26;padding:12px 20px;font-size:14px;color:var(--night-muted)}
+.stack-guide{margin-top:14px}
+.stack-guide pre{margin-bottom:12px}
+.stack-guide ol{margin:0;padding-left:22px}
+.stack-guide li+li{margin-top:16px}
+@media(max-width:760px){
+  .stack-map .map-body{grid-template-columns:131px minmax(0,1fr);padding:0 12px}
+  .stack-map .lane code{font-size:10px}
+}
 details{border-top:1px solid var(--rule)}
 details:last-of-type{border-bottom:1px solid var(--rule)}
 summary{list-style:none;display:flex;align-items:center;gap:14px;cursor:pointer;padding:16px 2px;font-size:clamp(17px,1.6vw,21px);font-weight:590;letter-spacing:-.02em}
@@ -144,7 +159,7 @@ footer a+a{margin-left:16px}
       <svg viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M6 24h20M6 24c7 0 5-15 12-15h7"/><circle cx="6" cy="24" r="3.3" fill="var(--paper)"/><circle cx="25" cy="9" r="3.3" fill="var(--paper)"/><circle cx="26" cy="24" r="3.3" fill="var(--paper)"/></svg>
       Python для бизнес-аналитики
     </div>
-    <nav aria-label="Разделы памятки"><a href="#map">Карта веток</a><a href="#cases">Разбор ситуаций</a><a href="#merge">Как мерджить</a></nav>
+    <nav aria-label="Разделы памятки"><a href="#map">Карта веток</a><a href="#cases">Разбор ситуаций</a><a href="#stack">Ветка от ветки</a><a href="#merge">Как мерджить</a></nav>
   </div>
 </header>
 <main class="wrap">
@@ -161,41 +176,99 @@ footer a+a{margin-left:16px}
       <div class="lanes">
         <div class="lane main" style="top:19%"><b>main</b><code>общая версия</code></div>
         <div class="lane anya" style="top:42%"><b>Аня · Выручка</b><code>feature/revenue</code></div>
-        <div class="lane boris" style="top:65%"><b>Борис · Отказы</b><code>feature/fail-rate</code></div>
+        <div class="lane boris" style="top:65%"><b>Борис · Среднее</b><code>feature/avg-pay</code></div>
         <div class="lane vera" style="top:88%"><b>Вера · Сводка</b><code>feature/summary</code></div>
       </div>
-      <div class="plot" id="plot" role="img" aria-label="Три ветки начинаются с общего коммита. Сначала в main попадают две метрики, затем Вера объединяет их со своим кодом и вливает сводку.">
+      <div class="plot" id="plot" role="img" aria-label="Аня и Вера создают ветки от main. Оранжевая ветка Бориса начинается с коммита на зелёной ветке Ани, где уже посчитаны сумма и число успешных платежей.">
         <svg viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true">
           <path class="guide" d="M0 38H1000"/>
           <path class="wire" d="M0 38H35"/>
-          <path class="wire" data-show="3" d="M35 38H730"/>
-          <path class="wire" data-show="4" d="M730 38H995"/>
+          <path class="wire" data-show="3" d="M35 38H585"/>
+          <path class="wire" data-show="4" d="M585 38H786"/>
+          <path class="wire" data-show="5" d="M786 38H995"/>
           <g class="anya">
-            <path class="wire" data-show="1" d="M35 38C90 38 104 84 183 84H480"/>
+            <path class="wire" d="M35 38C90 38 104 84 183 84H280"/>
+            <path class="wire" data-show="2" d="M280 84H480"/>
             <path class="wire" data-show="3" d="M480 84C533 84 532 38 585 38"/>
           </g>
           <g class="boris">
-            <path class="wire" data-show="1" d="M35 38C86 38 77 130 173 130H570"/>
-            <path class="wire" data-show="3" d="M570 130C651 130 649 38 730 38"/>
+            <path class="wire" data-show="1" d="M280 84C327 84 324 130 398 130H535"/>
+            <path class="wire" data-show="3" d="M535 130H677"/>
+            <path class="wire" data-show="3" style="stroke-dasharray:4 6;opacity:.82" d="M585 38C634 38 619 130 677 130"/>
+            <path class="wire" data-show="4" d="M677 130C741 130 726 38 786 38"/>
           </g>
           <g class="vera">
-            <path class="wire" data-show="1" d="M35 38C72 38 51 176 162 176H510"/>
-            <path class="wire" data-show="4" d="M510 176H876C927 176 902 38 962 38"/>
-            <path class="wire" data-show="4" style="stroke-dasharray:4 6;opacity:.82" d="M730 38C776 38 761 176 824 176"/>
+            <path class="wire" d="M35 38C72 38 51 176 162 176H230"/>
+            <path class="wire" data-show="2" d="M230 176H510"/>
+            <path class="wire" data-show="4" d="M510 176H865"/>
+            <path class="wire" data-show="4" style="stroke-dasharray:4 6;opacity:.82" d="M786 38C842 38 797 176 865 176"/>
+            <path class="wire" data-show="5" d="M865 176H905C950 176 920 38 962 38"/>
           </g>
         </svg>
       </div>
     </div>
     <figcaption class="map-footer">
-      <div class="map-note" aria-live="polite"><strong id="map-caption">Три задачи встречаются в main</strong><p id="map-description">Сначала в main вливают две метрики. Пунктир показывает, как Вера забирает их в свою ветку. После проверки она вливает готовую сводку.</p></div>
+      <div class="map-note" aria-live="polite"><strong id="map-caption">Борис ответвляется от коммита Ани</strong><p id="map-description">Зелёная ветка Ани и сиреневая ветка Веры выходят из main. Оранжевая линия начинается в точке «Старт Бориса» на зелёной ветке. В этом коммите уже есть сумма и число успешных платежей для его расчёта.</p></div>
       <div class="nav-buttons"><button type="button" id="back" hidden>Назад</button><button type="button" id="next" class="next">Разобрать по шагам →</button></div>
     </figcaption>
   </figure>
   <div class="map-notes" aria-label="Что проверяет команда на трёх платежах за день">
-    <article class="person anya"><h3><i class="swatch"></i>Аня считает выручку</h3><p>Из трёх платежей на 100, 200 и 50 ₽ прошли первые два. Значит, в выручке должно быть 300 ₽.</p></article>
-    <article class="person boris"><h3><i class="swatch"></i>Борис считает отказы</h3><p>Один платёж из трёх отклонён. Доля отказов за день равна ⅓. Борис проверяет её на тех же данных.</p></article>
-    <article class="person vera"><h3><i class="swatch"></i>Вера собирает сводку</h3><p>Пока коллеги пишут код, Вера передаёт в шаблон 300 и ⅓. В готовом отчёте должны появиться «300 ₽» и «33,3 %».</p></article>
+    <article class="person anya"><h3><i class="swatch"></i>Аня считает выручку</h3><p>Из трёх платежей на 100, 200 и 50 ₽ прошли первые два. Аня возвращает два числа за день — 300 ₽ выручки и 2 успешных платежа.</p></article>
+    <article class="person boris"><h3><i class="swatch"></i>Борис считает средний платёж</h3><p>В его ветке уже есть функция Ани. Борис делит выручку на число успешных платежей и получает 300 / 2 = 150 ₽.</p></article>
+    <article class="person vera"><h3><i class="swatch"></i>Вера собирает сводку</h3><p>Вера начинает шаблон от main. Когда оба расчёта влиты, она подключает их и сверяет две строки отчёта — «Выручка 300 ₽» и «Средний платёж 150 ₽».</p></article>
   </div>
+
+  <section class="lesson" id="stack" aria-labelledby="stack-title">
+    <div class="side">
+      <p class="kicker">Зависимые задачи</p>
+      <h2 id="stack-title">Когда нужна ветка Ани?</h2>
+      <p>Аня уже выложила расчёт числа платежей и отказов по дням. Вера проверяет её PR. Борису нужны эти числа для недельной доли отказов. Он может начать сегодня и отдать свою работу на отдельное ревью.</p>
+    </div>
+    <div>
+      <figure class="map stack-map" aria-labelledby="stack-map-title">
+        <div class="map-header"><h3 id="stack-map-title">От дневных чисел к недельной доле</h3></div>
+        <div class="map-body">
+          <div class="lanes">
+            <div class="lane main" style="top:25%"><b>main</b></div>
+            <div class="lane anya" style="top:53%"><b>Аня · По дням</b><code>feature/daily-counts</code></div>
+            <div class="lane boris" style="top:83%"><b>Борис · За неделю</b><code>feature/weekly-rate</code></div>
+          </div>
+          <div class="plot" role="img" aria-label="Ветка Ани начинается в main. Оранжевая линия Бориса начинается в коммите Ани. Сначала в main вливают дневные числа. Борис забирает обновлённую main в свою ветку, а затем вливает недельную долю.">
+            <svg viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true">
+              <path class="wire" d="M0 25H1000"/>
+              <path class="wire anya" d="M35 25C95 25 74 53 150 53H475C550 53 527 25 603 25"/>
+              <path class="wire boris" d="M270 53C336 53 305 83 393 83H802C895 83 847 25 950 25"/>
+              <path class="wire" style="stroke-dasharray:4 6;opacity:.7" d="M603 25C674 25 630 83 731 83"/>
+            </svg>
+            <span class="node" style="left:3.5%;top:25%"></span>
+            <span class="node anya" style="left:27%;top:53%"></span>
+            <span class="node boris" style="left:48%;top:83%"></span>
+            <span class="node join anya" style="left:60.3%;top:25%"></span>
+            <span class="node join boris" style="left:73.1%;top:83%"></span>
+            <span class="node join boris" style="left:95%;top:25%"></span>
+            <span class="plot-label anya" style="left:60.3%;top:9%">PR Ани</span>
+            <span class="plot-label boris" style="left:92%;top:9%">PR Бориса</span>
+          </div>
+        </div>
+        <figcaption>Оранжевая линия начинается на зелёной. Борис получает код Ани на момент ответвления. Пунктир показывает, когда он забирает принятую в <code>main</code> версию.</figcaption>
+      </figure>
+      <details class="stack-guide"><summary>Как Борису создать ветку и открыть свой PR?</summary>
+        <div class="step-body"><ol>
+          <li><b>Начните с коммита Ани.</b> Аня отправила свою ветку на GitHub. В своём клоне Борис выполняет команды при чистой рабочей копии.
+            <pre>git fetch origin
+git switch --no-track -c feature/weekly-rate origin/feature/daily-counts</pre>
+            Теперь у Бориса есть отдельная локальная ветка с дневными числами. Новые коммиты Ани можно забрать позже.</li>
+          <li><b>Покажите Вере недельный расчёт.</b> После своего первого коммита Борис выполняет <code>git push -u origin feature/weekly-rate</code>. На GitHub он открывает PR с <b>base</b> = <code>feature/daily-counts</code> и <b>compare</b> = <code>feature/weekly-rate</code>. Пока PR Ани открыт, Вера уже может смотреть изменения Бориса в <b>Files changed</b>. Слияние PR Бориса оставьте до следующего шага.</li>
+          <li><b>После слияния PR Ани перенаправьте PR Бориса в <code>main</code>.</b> В примере команда выбирает <b>Create a merge commit</b> для PR Ани. Борис забирает итог её ревью в свою ветку.
+            <pre>git switch feature/weekly-rate
+git fetch origin
+git merge origin/main
+git push</pre>
+            В открытом PR Борис проверяет поле <b>base</b>. Если там ещё <code>feature/daily-counts</code>, рядом с заголовком нажимает <b>Edit</b>, выбирает <code>main</code> и подтверждает <b>Change base</b>. Вера ещё раз открывает <b>Files changed</b>. Там должны быть только изменения для недельного расчёта. Она сверяет долю с исходными числами, затем команда вливает второй PR. <a href="https://docs.github.com/en/pull-requests/how-tos/create-pull-requests/changing-the-base-branch-of-a-pull-request">Смена базы PR на GitHub</a></li>
+        </ol></div>
+      </details>
+    </div>
+  </section>
 
   <section class="lesson" id="cases" aria-labelledby="cases-title">
     <div class="side">
@@ -224,7 +297,7 @@ footer a+a{margin-left:16px}
     </div>
     <div class="steps">
       <details open><summary><span class="num">01</span>Начните задачу от свежей main</summary>
-        <div class="step-body"><p>Договоритесь, какой результат должна дать фича. Аня берёт платежи за один день и считает выручку по успешным списаниям. Проверьте, что рабочая копия чистая, обновите <code>main</code> и создайте ветку.</p>
+        <div class="step-body"><p>Договоритесь, какой результат должна дать фича. Аня считает выручку за день и число успешных списаний. Борису понадобятся оба результата. Проверьте, что рабочая копия чистая, обновите <code>main</code> и создайте ветку.</p>
           <pre>git status
 git switch main
 git pull --ff-only
@@ -256,7 +329,7 @@ git merge origin/main</pre>
           <p>Сформируйте сводку за одну дату. Сравните обе цифры с отдельными расчётами Ани и Бориса за тот же день. Если они совпали, добавьте изменённые файлы через <code>git add</code>, сделайте коммит и выполните <code>git push</code>. Коллега проверяет итоговый PR Веры перед слиянием.</p>
           <details><summary>Что делать, если Git показал конфликт?</summary>
             <div class="sub"><p>Оставайтесь в ветке задачи. Команда <code>git status</code> покажет спорные файлы. Откройте их и найдите блоки между <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, <code>=======</code> и <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>. Вместе с автором второй правки соберите нужную версию и удалите маркеры.</p>
-              <p>Например, если вы оба добавили показатель в одну строку сводки, проверьте, что в ней видны и выручка, и доля отказов. Для конфликта в <code>src/prime/summary.py</code> команды будут такими.</p>
+              <p>Например, если вы оба добавили показатель в одну строку сводки, проверьте, что в ней видны и выручка, и средний платёж. Для конфликта в <code>src/prime/summary.py</code> команды будут такими.</p>
               <pre>git add src/prime/summary.py
 git diff --cached
 git commit -m "Объединить изменения сводки"
@@ -294,32 +367,37 @@ function addMark(type, x, y, lane = "", stage = 0, label = "") {
 
 addMark("node", 3.5, 19);
 addMark("plot-label start-tag", 4, 5, "", 0, "старт");
-for (const [lane, y, first, last, mergeX, mergeStage, pr] of [
-  ["anya", 42, 26, 48, 58.5, 3, "#1"],
-  ["boris", 65, 31, 57, 73, 3, "#2"],
-  ["vera", 88, 23, 51, 96.2, 4, "#3"]
+addMark("node", 28, 42, "anya");
+addMark("fork-tag", 28, 42, "boris", 1, "Старт Бориса");
+addMark("node", 23, 88, "vera");
+addMark("node", 42, 65, "boris", 1);
+for (const [lane, y, last, commitStage, mergeX, mergeStage, pr] of [
+  ["anya", 42, 48, 2, 58.5, 3, "#1"],
+  ["boris", 65, 53.5, 1, 78.6, 4, "#2"],
+  ["vera", 88, 51, 2, 96.2, 5, "#3"]
 ]) {
-  addMark("node", first, y, lane, 1);
-  addMark("node", last, y, lane, 1);
-  addMark("plot-label pr", last, y - 4, lane, 2, "PR " + pr);
-  plot.lastElementChild.dataset.until = lane === "vera" ? "3" : "2";
+  addMark("node", last, y, lane, commitStage);
+  addMark("plot-label pr", last, y, lane, 2, "PR " + pr);
+  plot.lastElementChild.dataset.until = "2";
   addMark("node join", mergeX, 19, lane, mergeStage);
   addMark("plot-label", mergeX, 5, lane, mergeStage, "PR " + pr);
   plot.lastElementChild.dataset.short = pr;
 }
-addMark("node join", 82.4, 88, "vera", 4);
-addMark("node", 87.2, 88, "vera", 4);
+addMark("node join", 67.7, 65, "boris", 3);
+addMark("node join", 86.5, 88, "vera", 4);
+addMark("node", 90.5, 88, "vera", 5);
 
-const overview = ["Три задачи встречаются в main", "Сначала в main вливают две метрики. Пунктир показывает, как Вера забирает их в свою ветку. После проверки она вливает готовую сводку."];
-const stages = [
-  ["Один старт для троих", "Команда выбирает пример на три платежа и согласует формат данных. Каждый создаёт ветку задачи от одного коммита в свежей main. Пока ветки указывают на одну точку."],
-  ["Три задачи развиваются параллельно", "Аня проверяет сумму, Борис — долю отказов, Вера — текст сводки на известных значениях. Каждый сохраняет свои изменения коммитами в ветке задачи."],
-  ["Коллеги открывают pull requests", "PR предлагает влить изменения в main. Борис проверяет Аню, Вера — Бориса, Аня смотрит шаблон Веры. Сводку пока рано вливать, ведь ей нужны обе метрики."],
-  ["Две независимые метрики попадают в main", "После ревью вливают PR #1 и #2. Их можно было влить и в обратном порядке. Код сводки всё ещё находится в отдельной ветке Веры."],
-  ["Сводка получает обе метрики", "Пунктир показывает, как Вера забирает свежую main к себе. Она подключает расчёты и сверяет цифры в сводке с цифрами Ани и Бориса за тот же день. После ревью команда вливает PR #3."]
-];
 const caption = document.getElementById("map-caption");
 const description = document.getElementById("map-description");
+const overview = [caption.textContent, description.textContent];
+const stages = [
+  ["Аня и Вера начинают от main", "Аня отправляет на GitHub коммит с дневной выручкой и числом успешных платежей. Вера в своей ветке готовит шаблон сводки. Обе задачи уже видны на карте."],
+  ["Борис создаёт ветку от ветки Ани", "Борису нужны оба числа из функции Ани. После git fetch origin он выполняет git switch --no-track -c feature/avg-pay origin/feature/revenue. Его первый собственный коммит — на оранжевой линии."],
+  ["Вера проверяет формулу Бориса отдельно", "Аня открывает PR #1 в main. Борис открывает PR #2 с базой feature/revenue. Поэтому Вера видит в нём расчёт среднего платежа. Её собственный PR #3 с шаблоном пока остаётся черновиком."],
+  ["Сначала команда вливает расчёт Ани", "После слияния PR #1 Борис забирает свежую main в свою ветку. Это первый пунктир на карте. Он проверяет, что базой PR #2 теперь выбрана main, и сверяет 300 / 2 = 150 ₽."],
+  ["Средний платёж попадает в main", "Команда вливает PR #2. Теперь Вера забирает в свою ветку оба расчёта из main. Пунктир до сиреневой линии показывает это обновление."],
+  ["Вера подключает расчёты к сводке", "Вера сверяет в сводке выручку 300 ₽ и средний платёж 150 ₽. После ревью команда вливает PR #3. Все три задачи собраны в main."]
+];
 const back = document.getElementById("back");
 const next = document.getElementById("next");
 let stage = -1;
@@ -360,7 +438,7 @@ const cases = [
   },
   {
     label: "Общий фильтр",
-    question: "Коллега закончил общий фильтр успешных платежей. Другим расчётам он тоже нужен. Моя новая метрика использует этот фильтр. Сколько веток взять?",
+    question: "Коллега закончил общий фильтр успешных платежей. Другим расчётам он тоже нужен. Я начну свою метрику завтра, когда фильтр уже будет в main. Сколько веток взять?",
     answer: 2, title: "Две ветки со своим порядком слияния.",
     why: "Первым влейте PR с фильтром. Обновите main и создайте от неё ветку метрики. Если вы уже начали метрику в своей ветке, выполните в ней git fetch origin и git merge origin/main. Теперь вы можете вызвать общую функцию.",
     check: "Посмотрите несколько строк до и после фильтра. В результате остаются платежи со статусом success. Затем посчитайте метрику по этим строкам."
@@ -412,6 +490,30 @@ const cases = [
     answer: 1, title: "Борис разрешает конфликт в своей ветке.",
     why: "В ветке backfill Борис выполняет git fetch origin и git merge origin/main. Вместе с Аней он редактирует спорный блок, оставляет регистрацию обеих команд, убирает маркеры конфликта и отправляет результат в тот же PR.",
     check: "Если команда проекта называется prime, запустите uv run prime --help. В списке должны быть replay и backfill. Откройте справку каждой команды с --help, чтобы убедиться, что доступны обе."
+  },
+  {
+    label: "Недельная доля",
+    question: "В ветке Ани уже есть дневные числа платежей и отказов. В main их пока нет. Борис хочет сегодня запустить недельный расчёт на этих числах и отдельно показать формулу Вере. Откуда ему начать?",
+    choices: ["От main и скопировать код Ани", "Создать свою ветку от ветки Ани"],
+    answer: 2, title: "Борис создаёт feature/weekly-rate от feature/daily-counts.",
+    why: "Дневные числа сразу доступны. Борис суммирует их по неделе и делит общее число отказов на общее число платежей. В первом сравнении с веткой Ани Вера видит только эту формулу. Когда дневные числа приняты, Борис меняет базу своего PR на main.",
+    check: "Допустим, платежи за неделю были в два дня. В первый отклонён 1 из 2, во второй — 1 из 8. За всю неделю выходит 2 из 10, то есть 20 %. Простое среднее двух дневных долей дало бы 31,25 %."
+  },
+  {
+    label: "Каскадная диаграмма",
+    question: "Аня выложила разложение изменения выручки по факторам. PR ещё на ревью. Борису нужны реальные строки расчёта, чтобы проверить порядок столбцов диаграммы. Где ему сделать график?",
+    choices: ["В своей ветке от ветки Ани", "Добавить график прямо в PR Ани"],
+    answer: 1, title: "Ветка графика начинается с готового расчёта Ани.",
+    why: "Два результата можно принять отдельно. Вера проверяет арифметику в PR Ани, а в PR Бориса с базой на ветке Ани смотрит диаграмму. Так расчёт можно влить, даже если подписи графика ещё требуют правок.",
+    check: "Выберите два периода. Начальный столбец плюс все вклады факторов должен дать конечный столбец. Сверьте оба края графика с суммами выручки за те же периоды."
+  },
+  {
+    label: "История инцидентов",
+    question: "Борис уже ответвился от ветки Ани, чтобы вывести историю инцидентов на дашборд. По замечанию Веры Аня переименовала поле даты и отправила коммит в свой открытый PR. Как Борису получить правку сегодня?",
+    choices: ["Обновить свою ветку из ветки Ани", "Обновить свою ветку из main"],
+    answer: 1, title: "После ответвления новые коммиты Ани нужно забрать явно.",
+    why: "Оставаясь в своей ветке дашборда, Борис выполняет git fetch origin, затем git merge origin/feature/incidents. Он обновляет обращение к полю, фиксирует свою правку и выполняет git push. Базой его PR пока остаётся feature/incidents.",
+    check: "Возьмите один сохранённый инцидент. Откройте его дату на дашборде и сверьте с записью в хранилище. В Files changed у Бориса должны быть правки дашборда, а переименование поля остаётся в PR Ани."
   }
 ];
 const caseTabs = document.querySelector(".case-tabs");
