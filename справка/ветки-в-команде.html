@@ -77,18 +77,18 @@ h1 em{font-family:var(--serif);font-weight:400;letter-spacing:-.077em;color:var(
 .side h2{font-size:clamp(34px,3.55vw,52px);line-height:1.03;font-weight:620;letter-spacing:-.055em;margin:12px 0 15px;text-wrap:balance}
 .side>p:last-child{color:var(--muted);max-width:32ch}
 .case-box{border:1px solid #bcc8de;border-radius:14px;overflow:hidden;background:#edf1fa}
-.case-tabs{display:flex;align-items:stretch;border-bottom:1px solid #c3ccdd;background:#e3e9f5}
-.case-tabs button{flex:1;background:transparent;border:0;border-bottom:3px solid transparent;font:600 14px var(--sans);min-height:48px;padding:8px 6px}
+.case-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:#c3ccdd;border-bottom:1px solid #c3ccdd}
+.case-tabs button{background:#e3e9f5;border:0;border-bottom:3px solid transparent;font:600 14px var(--sans);min-height:43px;padding:7px 6px}
 .case-tabs button[aria-pressed="true"]{border-color:var(--blue);background:#edf1fa;color:#213f96}
 .case-tabs button:hover{background:#f4f6fc}
 .case-content{padding:24px 27px}
 .case-content h3{font-size:clamp(21px,2vw,28px);line-height:1.25;letter-spacing:-.035em;font-weight:580}
-.case-content .prompt{color:var(--muted);font-size:15px;margin-top:11px}
 .choice-row{gap:9px;flex-wrap:wrap;margin-top:17px}
 .choice-row button{background:var(--white);border:1px solid #8090af;border-radius:7px;padding:9px 15px;font-size:15px;font-weight:550}
 .choice-row button:hover,.choice-row button[aria-pressed="true"]{background:#243e80;color:white;border-color:#243e80}
 .feedback{margin-top:18px;border-top:1px solid #bac5d8;padding-top:13px;font-size:16px}
 .feedback strong{display:block;margin-bottom:4px}
+.feedback p+p{margin-top:10px}
 details{border-top:1px solid var(--rule)}
 details:last-of-type{border-bottom:1px solid var(--rule)}
 summary{list-style:none;display:flex;align-items:center;gap:14px;cursor:pointer;padding:16px 2px;font-size:clamp(17px,1.6vw,21px);font-weight:590;letter-spacing:-.02em}
@@ -200,23 +200,18 @@ footer a+a{margin-left:16px}
   <section class="lesson" id="cases" aria-labelledby="cases-title">
     <div class="side">
       <p class="kicker">Распределение задач</p>
-      <h2 id="cases-title">Одна ветка или две?</h2>
-      <p>Держите в <code>main</code> проверенную версию проекта. Если все трое пишут разные фичи в одной ветке, готовая выручка может застрять из-за незаконченной сводки. Что можно проверить и влить отдельно?</p>
+      <h2 id="cases-title">Как разделить работу?</h2>
+      <p>Если вся команда пишет в одной ветке, готовая выручка может застрять из-за незаконченной сводки. Выберите ситуацию из проекта и решите, что можно влить отдельно, а где сначала нужно договориться с коллегой.</p>
     </div>
     <div class="case-box">
-      <div class="case-tabs" role="group" aria-label="Выберите ситуацию">
-        <button type="button" data-case="0" aria-pressed="true">Одна метрика</button>
-        <button type="button" data-case="1" aria-pressed="false">Две метрики</button>
-        <button type="button" data-case="2" aria-pressed="false">Общая функция</button>
-      </div>
+      <div class="case-tabs" role="group" aria-label="Выберите ситуацию"></div>
       <div class="case-content">
         <h3 id="case-question" aria-live="polite">Я написала две функции для выручки. Коллега добавляет третью — отбор по дате только для этой метрики. Сколько веток взять?</h3>
-        <p class="prompt">Как бы вы организовали работу?</p>
         <div class="choice-row" role="group" aria-label="Ваш ответ">
           <button type="button" data-answer="1" aria-pressed="false">Одну ветку</button>
           <button type="button" data-answer="2" aria-pressed="false">Две ветки</button>
         </div>
-        <div id="feedback" class="feedback" aria-live="polite" hidden><strong id="verdict"></strong><p id="reason"></p></div>
+        <div id="feedback" class="feedback" aria-live="polite" hidden><strong id="verdict"></strong><p id="reason"></p><p><b>Как проверить.</b> <span id="manual-check"></span></p></div>
       </div>
     </div>
   </section>
@@ -229,7 +224,7 @@ footer a+a{margin-left:16px}
     </div>
     <div class="steps">
       <details open><summary><span class="num">01</span>Начните задачу от свежей main</summary>
-        <div class="step-body"><p>Договоритесь, что войдёт в эту фичу. У Ани это расчёт дневной выручки и его тест. Проверьте, что рабочая копия чистая, обновите <code>main</code> и создайте ветку.</p>
+        <div class="step-body"><p>Договоритесь, какой результат должна дать фича. Аня берёт платежи за один день и считает выручку по успешным списаниям. Проверьте, что рабочая копия чистая, обновите <code>main</code> и создайте ветку.</p>
           <pre>git status
 git switch main
 git pull --ff-only
@@ -237,32 +232,33 @@ git switch -c feature/revenue</pre>
         </div>
       </details>
       <details><summary><span class="num">02</span>Проверьте расчёт и отправьте ветку</summary>
-        <div class="step-body"><p>Добавьте реализацию и тест на три платежа. Ниже пример для проекта с <code>pytest</code>. Подставьте пути своих файлов. После теста запишите изменения в коммит и отправьте его на GitHub.</p>
-          <pre>uv run pytest tests/test_revenue.py
-git add src/prime/revenue.py tests/test_revenue.py
+        <div class="step-body"><p>Запустите свой расчёт за один день. В исходной таблице <code>payments</code> за тот же день оставьте строки со статусом <code>success</code> и сложите <code>amount</code>. Сверьте две суммы. Используйте границы дня и часовой пояс, которые выбрала команда.</p>
+          <p>Посмотрите изменения и отправьте расчёт на GitHub. В команде <code>git add</code> подставьте путь к файлу, который вы изменили.</p>
+          <pre>git status --short
+git add src/prime/revenue.py
+git diff --cached
 git commit -m "Рассчитать выручку по успешным платежам"
 git push -u origin feature/revenue</pre>
-          <p>В тесте выручка должна быть 300 ₽. Если получилось 350 ₽, в сумму попал отклонённый платёж.</p>
         </div>
       </details>
       <details><summary><span class="num">03</span>Откройте PR и попросите коллегу проверить</summary>
         <div class="step-body"><p>На GitHub откройте <b>Pull requests → New pull request</b>. Выберите <b>base</b> = <code>main</code> (куда вливаем) и <b>compare</b> = <code>feature/revenue</code> (откуда). Нажмите <b>Create pull request</b>.</p>
-          <p>В описании укажите, что изменилось и как это проверить. Например, «Два успешных платежа на 100 и 200 ₽ и один отказ на 50 ₽ дают выручку 300 ₽. Проверка — <code>uv run pytest tests/test_revenue.py</code>».</p>
-          <p>Борис открывает <b>Files changed</b> и смотрит, проверяет ли тест исключение отказов. Если понадобятся правки, Аня делает новый коммит в этой же ветке и выполняет <code>git push</code>. Изменения появятся в открытом PR.</p>
+          <p>В описании PR укажите дату, способ запуска и две суммы, которые вы сравнили. Для трёх платежей с нашей схемы подошла бы такая запись. «Расчёт вернул 300 ₽. Вручную получилось 100 + 200 = 300 ₽. Платёж на 50 ₽ отклонён».</p>
+          <p>Борис открывает <b>Files changed</b>, смотрит, какие статусы попадают в сумму, и повторяет расчёт за указанную дату. Если понадобятся правки, Аня делает новый коммит в этой же ветке и выполняет <code>git push</code>. Изменения появятся в открытом PR.</p>
         </div>
       </details>
       <details><summary><span class="num">04</span>Проверьте совместимость и выполните merge</summary>
-        <div class="step-body"><p>Когда коллега проверил изменения, замечания учтены и тесты проходят, нажмите в PR <b>Merge pull request → Confirm merge</b>. На схеме выбран вариант <b>Create a merge commit</b>. Кружок на <code>main</code> показывает, где сошлись две истории.</p>
+        <div class="step-body"><p>Когда коллега сверил результат и вы учли замечания, нажмите в PR <b>Merge pull request → Confirm merge</b>. На схеме выбран вариант <b>Create a merge commit</b>. Кружок на <code>main</code> показывает, где сошлись две истории.</p>
           <p>Если PR зависит от чужого кода, сначала влейте зависимость. Так делает Вера после слияния обеих метрик. С сохранёнными в коммите правками она обновляет свою ветку, подключает реальные расчёты и проверяет сводку целиком.</p>
           <pre>git switch feature/summary
 git fetch origin
 git merge origin/main</pre>
-          <p>После подключения расчётов добавьте изменённые файлы через <code>git add</code>, сделайте коммит, запустите тесты и выполните <code>git push</code>. Коллега проверяет итоговый PR Веры перед слиянием.</p>
+          <p>Сформируйте сводку за одну дату. Сравните обе цифры с отдельными расчётами Ани и Бориса за тот же день. Если они совпали, добавьте изменённые файлы через <code>git add</code>, сделайте коммит и выполните <code>git push</code>. Коллега проверяет итоговый PR Веры перед слиянием.</p>
           <details><summary>Что делать, если Git показал конфликт?</summary>
             <div class="sub"><p>Оставайтесь в ветке задачи. Команда <code>git status</code> покажет спорные файлы. Откройте их и найдите блоки между <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, <code>=======</code> и <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>. Вместе с автором второй правки соберите нужную версию и удалите маркеры.</p>
               <p>Например, если вы оба добавили показатель в одну строку сводки, проверьте, что в ней видны и выручка, и доля отказов. Для конфликта в <code>src/prime/summary.py</code> команды будут такими.</p>
               <pre>git add src/prime/summary.py
-uv run pytest
+git diff --cached
 git commit -m "Объединить изменения сводки"
 git push</pre>
             </div>
@@ -270,10 +266,10 @@ git push</pre>
         </div>
       </details>
       <details><summary><span class="num">05</span>Обновите main у себя</summary>
-        <div class="step-body"><p>После слияния на GitHub каждый у себя переключается на <code>main</code> и забирает изменения. В примере после последнего PR команда запускает тест сводки на трёх платежах и видит оба показателя. Следующую фичу начинайте от обновлённой <code>main</code>.</p>
+        <div class="step-body"><p>После слияния на GitHub каждый у себя переключается на <code>main</code> и забирает изменения. Следующую фичу начинайте от обновлённой <code>main</code>.</p>
           <pre>git switch main
-git pull --ff-only
-uv run pytest</pre>
+git pull --ff-only</pre>
+          <p>Из обновлённой <code>main</code> запустите отчёт по инструкции вашей команды. Если используете названия из задания, команда <code>uv run prime report --date 2026-08-24</code> даст отчёт с дневными показателями за 23 августа. Сверьте их с расчётами за 23-е в том же часовом поясе.</p>
           <p>Итоговый проект проверяется по <code>main</code> на момент отправки. Перед сдачей убедитесь, что нужные PR влиты, и каждый участник отправил ссылку на общий репозиторий через <code>/submit</code>.</p>
         </div>
       </details>
@@ -317,10 +313,10 @@ addMark("node", 87.2, 88, "vera", 4);
 const overview = ["Три задачи встречаются в main", "Сначала в main вливают две метрики. Пунктир показывает, как Вера забирает их в свою ветку. После проверки она вливает готовую сводку."];
 const stages = [
   ["Один старт для троих", "Команда выбирает пример на три платежа и согласует формат данных. Каждый создаёт ветку задачи от одного коммита в свежей main. Пока ветки указывают на одну точку."],
-  ["Три задачи развиваются параллельно", "Аня проверяет сумму, Борис — долю отказов, Вера — текст сводки на известных значениях. Каждый сохраняет изменения и тесты коммитами в своей ветке."],
+  ["Три задачи развиваются параллельно", "Аня проверяет сумму, Борис — долю отказов, Вера — текст сводки на известных значениях. Каждый сохраняет свои изменения коммитами в ветке задачи."],
   ["Коллеги открывают pull requests", "PR предлагает влить изменения в main. Борис проверяет Аню, Вера — Бориса, Аня смотрит шаблон Веры. Сводку пока рано вливать, ведь ей нужны обе метрики."],
   ["Две независимые метрики попадают в main", "После ревью вливают PR #1 и #2. Их можно было влить и в обратном порядке. Код сводки всё ещё находится в отдельной ветке Веры."],
-  ["Сводка получает обе метрики", "Пунктир показывает, как Вера забирает свежую main к себе. Она подключает расчёты, проверяет 300 ₽ и 33,3 % на тестовых платежах. После ревью команда вливает PR #3."]
+  ["Сводка получает обе метрики", "Пунктир показывает, как Вера забирает свежую main к себе. Она подключает расчёты и сверяет цифры в сводке с цифрами Ани и Бориса за тот же день. После ревью команда вливает PR #3."]
 ];
 const caption = document.getElementById("map-caption");
 const description = document.getElementById("map-description");
@@ -349,39 +345,108 @@ showStage(-1);
 
 const cases = [
   {
+    label: "Одна метрика",
     question: "Я написала две функции для выручки. Коллега добавляет третью — отбор по дате только для этой метрики. Сколько веток взять?",
     answer: 1, title: "Одна ветка и один PR для выручки.",
-    why: "Отбор дня, фильтр успешных платежей и сумма отвечают на один вопрос «Сколько заработали за этот день?». Проверьте три функции вместе на одном примере. Аня отправляет feature/revenue на GitHub. Коллега выполняет git fetch origin и git switch feature/revenue. Теперь оба могут добавлять в эту ветку свои коммиты. Договоритесь, кто какие строки меняет."
+    why: "Три функции вместе отвечают на вопрос «Сколько заработали за день?». Аня отправляет feature/revenue на GitHub. Коллега выполняет git fetch origin и git switch feature/revenue. Оба делают свои коммиты в этой ветке, а один из них открывает общий PR.",
+    check: "Выберите день с успешными и отклонёнными платежами. Сравните результат с суммой успешных списаний за этот день."
   },
   {
+    label: "Две метрики",
     question: "Две мои функции считают выручку. Третья функция коллеги считает долю отказов по тем же платежам. Сколько веток взять?",
     answer: 2, title: "Две ветки и два PR.",
-    why: "У каждой метрики свой результат и свой тест. Даже если доля отказов ещё не готова, команда уже может проверить и влить выручку. Общий источник данных сам по себе не связывает эти две задачи."
+    why: "Каждая метрика даёт самостоятельный результат. Пока Борис уточняет знаменатель для доли отказов, Аня уже может влить выручку. Оба начинают от main и указывают в PR, за какой день считали.",
+    check: "На трёх платежах со схемы у Ани получается 300 ₽, у Бориса — один отказ из трёх. Каждый результат можно сверить отдельно."
   },
   {
+    label: "Общий фильтр",
     question: "Коллега закончил общий фильтр успешных платежей. Другим расчётам он тоже нужен. Моя новая метрика использует этот фильтр. Сколько веток взять?",
     answer: 2, title: "Две ветки со своим порядком слияния.",
-    why: "Фильтр уже можно проверить отдельно. Сначала влейте его с тестом, затем обновите main и создайте ветку метрики. Если ветка метрики уже есть, влейте в неё origin/main после git fetch origin. Так фильтр попадёт в проект один раз."
+    why: "Первым влейте PR с фильтром. Обновите main и создайте от неё ветку метрики. Если вы уже начали метрику в своей ветке, выполните в ней git fetch origin и git merge origin/main. Теперь вы можете вызвать общую функцию.",
+    check: "Посмотрите несколько строк до и после фильтра. В результате остаются платежи со статусом success. Затем посчитайте метрику по этим строкам."
+  },
+  {
+    label: "Курс ЦБ",
+    question: "Аня загружает курс валюты, Вера хочет вывести его в сводке. В воскресенье ЦБ может вернуть курс за субботу. Как начать обе задачи сегодня?",
+    choices: ["Согласовать поля и разойтись по веткам", "Ждать готовой сводки и добавить всё в неё"],
+    answer: 1, title: "Договоритесь, что именно загрузчик передаёт сводке.",
+    why: "Аня берёт ветку загрузчика, Вера — ветку сводки. Для связи им нужны валюта, курс за единицу и дата, которую вернул ЦБ. Вера может оформить строку по этим полям, пока Аня пишет загрузку. Сначала влейте загрузчик, затем подключите его к сводке.",
+    check: "Для отчёта за 24 августа 2026 года запросите курс за 23-е. Сверьте дату в ответе ЦБ и подпись в сводке. В примере задания курс датирован 22 августа."
+  },
+  {
+    label: "Пропущенный день",
+    question: "За 14 апреля в базе нет платежей. Аня добавляет проверку полноты, а Борис уже открыл PR с тревогой «Выручка упала». Какой PR влить первым?",
+    choices: ["Тревогу о выручке", "Проверку полноты дня"],
+    answer: 2, title: "Сначала дайте расчёту способ отличить пропуск от нуля.",
+    why: "Аня и Борис договариваются, как передать признак неполных данных. После слияния проверки Борис обновляет свою ветку и учитывает этот признак. Вера смотрит, какое сообщение увидит получатель.",
+    check: "Сформируйте отчёт за 15 апреля 2026 года по UTC. Он охватывает события 14-го. Ожидается предупреждение о пропуске данных. Тревога о падении выручки до нуля в этот день была бы ложной."
+  },
+  {
+    label: "Повторная загрузка",
+    question: "Вера строит дашборд и замечает, что после второго запуска за тот же день число платежей удвоилось. Ошибка повторяется и в main. Куда положить исправление?",
+    choices: ["В текущий PR дашборда", "В отдельную ветку от main"],
+    answer: 2, title: "Исправление загрузки можно влить отдельно.",
+    why: "Вера передаёт коллеге дату и два наблюдения — сколько строк было после первого и второго запуска. Коллега исправляет запись данных в своей ветке. После слияния Вера обновляет ветку дашборда и продолжает работу с корректной витриной.",
+    check: "На локальной копии хранилища дважды загрузите одну дату. Сравните число строк, число уникальных payment_id и сумму за день после каждого запуска. Все три значения должны совпасть между запусками."
+  },
+  {
+    label: "Повтор алёрта",
+    question: "Бот шлёт одно и то же предупреждение об отменах каждый день. Аня сохраняет открытый инцидент, Борис проверяет его перед отправкой. По отдельности их правки ещё не устраняют повторы. Сколько PR открыть?",
+    choices: ["Один PR на устранение повторов", "Два PR и сразу влить любой"],
+    answer: 1, title: "В этом случае удобно проверить обе правки вместе.",
+    why: "Договоритесь, по каким полям узнаёте тот же инцидент и когда он закрывается. Аня и Борис могут сделать по коммиту в общей ветке. Вера проверит наблюдаемый результат — сколько предупреждений подготовила система.",
+    check: "Последовательно обработайте два дня одного открытого инцидента. Посмотрите журнал или локальный вывод уведомлений. При первом обнаружении должно появиться одно новое предупреждение, при повторном — ни одного."
+  },
+  {
+    label: "Проценты на графике",
+    question: "Витрина хранит долю отказов как 0,25. В Telegram уже видно 25 %, а на дашборде подпись «0,25 %». Где сделать правку?",
+    choices: ["Изменить единицы в общей витрине", "Исправить подпись в ветке дашборда"],
+    answer: 2, title: "Для этой задачи достаточно PR дашборда.",
+    why: "Два представления читают один показатель. Вера исправляет форматирование на графике. Если поменять значение в общей витрине, действующий форматтер Telegram может умножить его на 100 ещё раз.",
+    check: "Возьмите одну дату и одно значение из витрины. При доле 0,25 в сохранённых данных обе подписи должны показывать 25 %."
+  },
+  {
+    label: "Конфликт в CLI",
+    question: "Аня влила команду replay в main. В ветке Бориса команда backfill меняет те же строки регистрации команд. Git показал конфликт. Как сохранить обе команды?",
+    choices: ["Объединить правки в ветке backfill", "Целиком выбрать версию файла из main"],
+    answer: 1, title: "Борис разрешает конфликт в своей ветке.",
+    why: "В ветке backfill Борис выполняет git fetch origin и git merge origin/main. Вместе с Аней он редактирует спорный блок, оставляет регистрацию обеих команд, убирает маркеры конфликта и отправляет результат в тот же PR.",
+    check: "Если команда проекта называется prime, запустите uv run prime --help. В списке должны быть replay и backfill. Откройте справку каждой команды с --help, чтобы убедиться, что доступны обе."
   }
 ];
-const selectors = Array.from(document.querySelectorAll("[data-case]"));
+const caseTabs = document.querySelector(".case-tabs");
+const selectors = cases.map((example, index) => {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.dataset.case = String(index);
+  button.textContent = example.label;
+  button.addEventListener("click", () => selectCase(index));
+  caseTabs.append(button);
+  return button;
+});
 const answers = Array.from(document.querySelectorAll("[data-answer]"));
 const feedback = document.getElementById("feedback");
 let currentCase = 0;
 function selectCase(index) {
   currentCase = index;
+  const example = cases[index];
   selectors.forEach((button, i) => button.setAttribute("aria-pressed", String(i === index)));
-  answers.forEach(button => button.setAttribute("aria-pressed", "false"));
-  document.getElementById("case-question").textContent = cases[index].question;
+  const choices = example.choices ?? ["Одну ветку", "Две ветки"];
+  answers.forEach((button, i) => {
+    button.setAttribute("aria-pressed", "false");
+    button.textContent = choices[i];
+  });
+  document.getElementById("case-question").textContent = example.question;
   feedback.hidden = true;
 }
-selectors.forEach((button, index) => button.addEventListener("click", () => selectCase(index)));
+selectCase(0);
 answers.forEach(button => button.addEventListener("click", () => {
   const example = cases[currentCase];
   const correct = Number(button.dataset.answer) === example.answer;
   answers.forEach(answer => answer.setAttribute("aria-pressed", String(answer === button)));
   document.getElementById("verdict").textContent = (correct ? "Да. " : "В этой ситуации удобнее иначе. ") + example.title;
   document.getElementById("reason").textContent = example.why;
+  document.getElementById("manual-check").textContent = example.check;
   feedback.hidden = false;
 }));
 </script>
