@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f8f7f1">
+<title>Git втроём · Python для бизнес-аналитики</title>
+<style>
+:root {
+  color-scheme:light;
+  --paper:#f8f7f1; --white:#fffefa; --ink:#19223a; --muted:#505b68; --rule:#cdd0c9;
+  --blue:#284fba; --night:#17243c; --night-muted:#becade; --mint:#81dec8; --amber:#f5bd78; --lilac:#b1b2ff;
+  --sans:"Fira Sans","Aptos","Segoe UI",Arial,sans-serif;
+  --mono:"Fira Mono","SFMono-Regular",Consolas,"Liberation Mono",monospace;
+  --serif:Georgia,"Times New Roman",serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.5 var(--sans)}
+a{color:var(--blue);text-underline-offset:.24em}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #497be5;outline-offset:4px}
+button:disabled{cursor:default}
+h1,h2,h3,p,figure{margin:0}
+code,pre,.mono{font-family:var(--mono)}
+code{font-size:.9em}
+.wrap{width:min(1180px,calc(100% - 88px));margin:auto}
+.mast{border-bottom:1px solid var(--rule)}
+.mast-inner,.brand,nav,.legend,.toolbar,.map-header,.map-footer,.nav-buttons,.choice-row{display:flex;align-items:center}
+.mast-inner{min-height:64px;justify-content:space-between;gap:20px}
+.brand{gap:12px;font-size:15px;font-weight:680;letter-spacing:-.02em}
+.brand svg{width:32px;height:32px;color:var(--blue)}
+nav{gap:25px} nav a{font-size:14px;text-decoration:none;color:var(--muted)} nav a:hover{text-decoration:underline;color:var(--blue)}
+main{padding-bottom:75px}
+.hero{display:grid;grid-template-columns:1.24fr 1fr;align-items:end;gap:4%;padding:53px 0 36px}
+.kicker{color:var(--blue);font:600 12px/1.4 var(--mono);letter-spacing:.09em;text-transform:uppercase}
+h1{font-size:clamp(70px,8.3vw,119px);line-height:1.03;letter-spacing:-.075em;font-weight:690}
+h1 em{font-family:var(--serif);font-weight:400;letter-spacing:-.077em;color:var(--blue)}
+.hero .kicker{margin-bottom:10px}
+.intro{align-self:end;font-size:clamp(17px,1.55vw,22px);line-height:1.38;max-width:445px;padding-bottom:7px;letter-spacing:-.02em}
+.map{background:var(--night);color:#f5f7fc;border-radius:18px;overflow:hidden;scroll-margin-top:18px}
+.map-header{padding:24px 32px 16px;justify-content:space-between;gap:15px}
+.map h2{font-size:clamp(23px,2.5vw,34px);letter-spacing:-.05em;font-weight:600;line-height:1.18}
+.legend{gap:16px;color:var(--night-muted);font-size:13px}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend i{width:9px;height:9px;border-radius:50%;background:#c8d2e5}
+.legend i.ring{background:none;border:2px solid #c8d2e5;outline:1px solid #c8d2e5;outline-offset:2px;margin-left:3px}
+.map-body{padding:0 32px 11px;display:grid;grid-template-columns:180px minmax(0,1fr);align-items:stretch}
+.lanes,.plot{height:218px;position:relative}
+.lane{position:absolute;left:0;transform:translateY(-50%);line-height:1.18}
+.lane b{display:block;font-size:15px;font-weight:600}
+.lane code{display:block;margin-top:4px;font-size:12px;color:var(--night-muted)}
+.lane.main b{font:600 15px var(--mono)}
+.anya{--color:var(--mint)}.boris{--color:var(--amber)}.vera{--color:var(--lilac)}
+.lane b,.wire,.node{color:var(--color,#f2f4fa)}
+.plot{background-image:radial-gradient(circle,#a9bed337 .8px,transparent .9px);background-size:15px 15px}
+.plot svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.wire{fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.guide{stroke:#8491aa;stroke-width:1;stroke-dasharray:3 5;vector-effect:non-scaling-stroke;opacity:.6}
+.node{position:absolute;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:currentColor;border:2px solid var(--night);box-shadow:0 0 0 1px currentColor}
+.node.join{width:16px;height:16px;border:3px solid currentColor;background:var(--night);box-shadow:0 0 0 2px var(--night)}
+.plot-label{position:absolute;transform:translateX(-50%);font:11px/1 var(--mono);color:var(--color,#ccd6e7);white-space:nowrap;letter-spacing:.015em}
+.plot-label.pr{background:var(--night);border:1px solid currentColor;border-radius:4px;padding:3px 5px;transform:translate(-50%,-115%)}
+.map-footer{border-top:1px solid #d4dff92a;padding:17px 32px;justify-content:space-between;gap:20px;background:#ffffff05}
+.map-note{max-width:690px}.map-note strong{font-size:16px;font-weight:600;display:block;margin-bottom:3px}
+.map-note p{color:#c8d3e5;font-size:15px;line-height:1.4}
+.nav-buttons{gap:8px;flex:none}
+.nav-buttons button{border-radius:8px;padding:9px 14px;min-height:41px;font-size:14px;font-weight:600;border:1px solid #7284a1;background:transparent;color:#eff4ff;white-space:nowrap}
+.nav-buttons .next{border-color:#e5ecfa;background:#e5ecfa;color:var(--night)}
+.nav-buttons button:hover{background:#314464}.nav-buttons .next:hover{background:white}
+.nav-buttons [hidden],[hidden]{display:none!important}
+.map-notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin:24px 0 0}
+.person{padding-right:23px}.person+.person{border-left:1px solid var(--rule);padding-left:25px}
+.person h3{display:flex;align-items:center;gap:9px;font-size:19px;letter-spacing:-.035em;margin-bottom:6px}
+.swatch{display:inline-block;width:13px;height:13px;background:var(--color);border:1px solid #223c5052;border-radius:50%;flex:none}
+.person p{color:var(--muted);font-size:15px;max-width:36ch}
+.lesson{border-top:1px solid var(--rule);margin-top:60px;padding-top:37px;display:grid;grid-template-columns:minmax(210px,.8fr) minmax(0,1.7fr);gap:6%;scroll-margin-top:25px}
+.side h2{font-size:clamp(34px,3.55vw,52px);line-height:1.03;font-weight:620;letter-spacing:-.055em;margin:12px 0 15px;text-wrap:balance}
+.side>p:last-child{color:var(--muted);max-width:32ch}
+.case-box{border:1px solid #bcc8de;border-radius:14px;overflow:hidden;background:#edf1fa}
+.case-tabs{display:flex;align-items:stretch;border-bottom:1px solid #c3ccdd;background:#e3e9f5}
+.case-tabs button{flex:1;background:transparent;border:0;border-bottom:3px solid transparent;font:600 14px var(--sans);min-height:48px;padding:8px 6px}
+.case-tabs button[aria-pressed="true"]{border-color:var(--blue);background:#edf1fa;color:#213f96}
+.case-tabs button:hover{background:#f4f6fc}
+.case-content{padding:24px 27px}
+.case-content h3{font-size:clamp(21px,2vw,28px);line-height:1.25;letter-spacing:-.035em;font-weight:580}
+.case-content .prompt{color:var(--muted);font-size:15px;margin-top:11px}
+.choice-row{gap:9px;flex-wrap:wrap;margin-top:17px}
+.choice-row button{background:var(--white);border:1px solid #8090af;border-radius:7px;padding:9px 15px;font-size:15px;font-weight:550}
+.choice-row button:hover,.choice-row button[aria-pressed="true"]{background:#243e80;color:white;border-color:#243e80}
+.feedback{margin-top:18px;border-top:1px solid #bac5d8;padding-top:13px;font-size:16px}
+.feedback strong{display:block;margin-bottom:4px}
+details{border-top:1px solid var(--rule)}
+details:last-of-type{border-bottom:1px solid var(--rule)}
+summary{list-style:none;display:flex;align-items:center;gap:14px;cursor:pointer;padding:16px 2px;font-size:clamp(17px,1.6vw,21px);font-weight:590;letter-spacing:-.02em}
+summary::-webkit-details-marker{display:none}
+summary::after{content:'+';width:24px;height:24px;flex:none;margin-left:auto;text-align:center;color:var(--blue);font:23px/1 var(--mono)}
+details[open]>summary::after{content:'−'}
+.num{font:13px/1 var(--mono);color:var(--blue)}
+.step-body{padding:0 7px 20px 35px;font-size:16px}
+.step-body p+p,.step-body pre+p{margin-top:10px}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#e9ece8;padding:14px 16px;border-radius:7px;margin:12px 0 0;font-size:14px;line-height:1.55}
+.step-body details{margin-top:14px;border-color:#c2cabd}
+.step-body summary{font-size:16px;padding:10px 0;color:var(--blue)}
+.step-body .sub{padding:0 0 14px}
+footer{border-top:1px solid var(--rule);padding:20px 0 32px;font-size:13px;color:var(--muted)}
+footer .wrap{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px 20px}
+footer a+a{margin-left:16px}
+@media(min-width:1450px){.hero{padding-top:65px}.lanes,.plot{height:245px}.map-header{padding-top:28px}.map-footer{padding-block:20px}}
+@media(max-width:850px){
+  .wrap{width:calc(100% - 48px)}.hero{padding:35px 0 27px;gap:20px;grid-template-columns:1.05fr 1fr}
+  .map-header{padding:20px 22px 12px}.map-body{padding-inline:22px;grid-template-columns:148px minmax(0,1fr)}
+  .map-footer{padding:15px 22px}.person+.person{padding-left:16px}.person{padding-right:16px}
+  .lesson{grid-template-columns:.75fr 1.4fr;gap:4%}.case-content{padding:19px}.legend{gap:12px}
+}
+@media(max-width:650px){
+  .wrap{width:calc(100% - 32px)}.mast-inner{min-height:53px}.brand{font-size:13px;gap:8px}.brand svg{width:26px;height:26px}
+  nav{gap:12px}nav a{font-size:12px}nav a:first-child,nav a:nth-child(2){display:none}
+  .hero{display:block;padding:29px 0 22px}.hero .kicker{margin-bottom:4px;font-size:10px}h1{font-size:clamp(61px,14vw,86px)}
+  .intro{font-size:16px;max-width:44ch;margin-top:12px;padding-bottom:0}
+  .map{border-radius:13px}.map-header{padding:17px 14px 9px;align-items:flex-start;flex-wrap:wrap;gap:7px}
+  .legend{font-size:11px}.map-body{padding:0 13px 5px;grid-template-columns:111px minmax(0,1fr)}
+  .lane b{font-size:13px}.lane code{font-size:10px}.lane.main b{font-size:13px}
+  .lanes,.plot{height:202px}.plot{background-size:12px 12px}.wire{stroke-width:2}
+  .node{width:8px;height:8px;border-width:1.5px}.node.join{width:11px;height:11px;border-width:2px}
+  .plot-label{font-size:10px}.plot-label.pr{padding:2px 3px;font-size:9px}.start-tag{display:none}
+  .plot-label[data-short]{font-size:0}.plot-label[data-short]::after{content:attr(data-short);font:11px/1 var(--mono)}
+  .map-footer{align-items:flex-start;flex-direction:column;gap:12px;padding:15px}
+  .map-note p{font-size:14px}.nav-buttons button{min-height:38px;padding:7px 12px}
+  .map-notes{grid-template-columns:1fr;gap:11px;margin-top:18px}
+  .person,.person+.person{border:0;padding:0 0 0 22px;position:relative}.person .swatch{position:absolute;left:0;top:6px}
+  .person h3{font-size:16px;margin:0}.person p{max-width:none;font-size:14px}
+  .lesson{display:block;margin-top:35px;padding-top:24px}.side{margin-bottom:17px}.side h2{font-size:34px;margin:6px 0 8px}
+  .side>p:last-child{max-width:none;font-size:16px}.case-tabs button{font-size:12px}.case-content{padding:17px 15px}
+  .case-content h3{font-size:21px}summary{gap:10px}.step-body{padding-left:0}.kicker{font-size:10px}
+  main{padding-bottom:36px}
+}
+@media(prefers-reduced-motion:no-preference){.choice-row button,.nav-buttons button{transition:background .15s}}
+</style>
+</head>
+<body>
+<header class="mast">
+  <div class="wrap mast-inner">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M6 24h20M6 24c7 0 5-15 12-15h7"/><circle cx="6" cy="24" r="3.3" fill="var(--paper)"/><circle cx="25" cy="9" r="3.3" fill="var(--paper)"/><circle cx="26" cy="24" r="3.3" fill="var(--paper)"/></svg>
+      Python для бизнес-аналитики
+    </div>
+    <nav aria-label="Разделы памятки"><a href="#map">Карта веток</a><a href="#cases">Разбор ситуаций</a><a href="#merge">Как мерджить</a></nav>
+  </div>
+</header>
+<main class="wrap">
+  <div class="hero">
+    <div><p class="kicker">Итоговый проект · ПРАЙМ</p><h1>Git <em>втроём</em></h1></div>
+    <p class="intro">Как разделить дневной отчёт на задачи, работать параллельно и собрать проверенные изменения в одной ветке <code>main</code>.</p>
+  </div>
+  <figure class="map" id="map" aria-labelledby="map-title">
+    <div class="map-header">
+      <h2 id="map-title">Карта веток команды</h2>
+      <div class="legend" aria-hidden="true"><span><i></i>Коммит</span><span><i class="ring"></i>Слияние</span></div>
+    </div>
+    <div class="map-body">
+      <div class="lanes">
+        <div class="lane main" style="top:19%"><b>main</b><code>общая версия</code></div>
+        <div class="lane anya" style="top:42%"><b>Аня · Выручка</b><code>feature/revenue</code></div>
+        <div class="lane boris" style="top:65%"><b>Борис · Отказы</b><code>feature/fail-rate</code></div>
+        <div class="lane vera" style="top:88%"><b>Вера · Сводка</b><code>feature/summary</code></div>
+      </div>
+      <div class="plot" id="plot" role="img" aria-label="Три ветки начинаются с общего коммита. Сначала в main попадают две метрики, затем Вера объединяет их со своим кодом и вливает сводку.">
+        <svg viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true">
+          <path class="guide" d="M0 38H1000"/>
+          <path class="wire" d="M0 38H35"/>
+          <path class="wire" data-show="3" d="M35 38H730"/>
+          <path class="wire" data-show="4" d="M730 38H995"/>
+          <g class="anya">
+            <path class="wire" data-show="1" d="M35 38C90 38 104 84 183 84H480"/>
+            <path class="wire" data-show="3" d="M480 84C533 84 532 38 585 38"/>
+          </g>
+          <g class="boris">
+            <path class="wire" data-show="1" d="M35 38C86 38 77 130 173 130H570"/>
+            <path class="wire" data-show="3" d="M570 130C651 130 649 38 730 38"/>
+          </g>
+          <g class="vera">
+            <path class="wire" data-show="1" d="M35 38C72 38 51 176 162 176H510"/>
+            <path class="wire" data-show="4" d="M510 176H876C927 176 902 38 962 38"/>
+            <path class="wire" data-show="4" style="stroke-dasharray:4 6;opacity:.82" d="M730 38C776 38 761 176 824 176"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+    <figcaption class="map-footer">
+      <div class="map-note" aria-live="polite"><strong id="map-caption">Три задачи встречаются в main</strong><p id="map-description">Сначала в main вливают две метрики. Пунктир показывает, как Вера забирает их в свою ветку. После проверки она вливает готовую сводку.</p></div>
+      <div class="nav-buttons"><button type="button" id="back" hidden>Назад</button><button type="button" id="next" class="next">Разобрать по шагам →</button></div>
+    </figcaption>
+  </figure>
+  <div class="map-notes" aria-label="Что проверяет команда на трёх платежах за день">
+    <article class="person anya"><h3><i class="swatch"></i>Аня считает выручку</h3><p>Из трёх платежей на 100, 200 и 50 ₽ прошли первые два. Значит, в выручке должно быть 300 ₽.</p></article>
+    <article class="person boris"><h3><i class="swatch"></i>Борис считает отказы</h3><p>Один платёж из трёх отклонён. Доля отказов за день равна ⅓. Борис проверяет её на тех же данных.</p></article>
+    <article class="person vera"><h3><i class="swatch"></i>Вера собирает сводку</h3><p>Пока коллеги пишут код, Вера передаёт в шаблон 300 и ⅓. В готовом отчёте должны появиться «300 ₽» и «33,3 %».</p></article>
+  </div>
+
+  <section class="lesson" id="cases" aria-labelledby="cases-title">
+    <div class="side">
+      <p class="kicker">Распределение задач</p>
+      <h2 id="cases-title">Одна ветка или две?</h2>
+      <p>Держите в <code>main</code> проверенную версию проекта. Если все трое пишут разные фичи в одной ветке, готовая выручка может застрять из-за незаконченной сводки. Что можно проверить и влить отдельно?</p>
+    </div>
+    <div class="case-box">
+      <div class="case-tabs" role="group" aria-label="Выберите ситуацию">
+        <button type="button" data-case="0" aria-pressed="true">Одна метрика</button>
+        <button type="button" data-case="1" aria-pressed="false">Две метрики</button>
+        <button type="button" data-case="2" aria-pressed="false">Общая функция</button>
+      </div>
+      <div class="case-content">
+        <h3 id="case-question" aria-live="polite">Я написала две функции для выручки. Коллега добавляет третью — отбор по дате только для этой метрики. Сколько веток взять?</h3>
+        <p class="prompt">Как бы вы организовали работу?</p>
+        <div class="choice-row" role="group" aria-label="Ваш ответ">
+          <button type="button" data-answer="1" aria-pressed="false">Одну ветку</button>
+          <button type="button" data-answer="2" aria-pressed="false">Две ветки</button>
+        </div>
+        <div id="feedback" class="feedback" aria-live="polite" hidden><strong id="verdict"></strong><p id="reason"></p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lesson" id="merge" aria-labelledby="merge-title">
+    <div class="side">
+      <p class="kicker">От ветки до pull request</p>
+      <h2 id="merge-title">Как влить изменения в <i>main</i></h2>
+      <p>Пройдём путь Ани. Команды выполняйте в терминале из корня своего клона командного репозитория.</p>
+    </div>
+    <div class="steps">
+      <details open><summary><span class="num">01</span>Начните задачу от свежей main</summary>
+        <div class="step-body"><p>Договоритесь, что войдёт в эту фичу. У Ани это расчёт дневной выручки и его тест. Проверьте, что рабочая копия чистая, обновите <code>main</code> и создайте ветку.</p>
+          <pre>git status
+git switch main
+git pull --ff-only
+git switch -c feature/revenue</pre>
+        </div>
+      </details>
+      <details><summary><span class="num">02</span>Проверьте расчёт и отправьте ветку</summary>
+        <div class="step-body"><p>Добавьте реализацию и тест на три платежа. Ниже пример для проекта с <code>pytest</code>. Подставьте пути своих файлов. После теста запишите изменения в коммит и отправьте его на GitHub.</p>
+          <pre>uv run pytest tests/test_revenue.py
+git add src/prime/revenue.py tests/test_revenue.py
+git commit -m "Рассчитать выручку по успешным платежам"
+git push -u origin feature/revenue</pre>
+          <p>В тесте выручка должна быть 300 ₽. Если получилось 350 ₽, в сумму попал отклонённый платёж.</p>
+        </div>
+      </details>
+      <details><summary><span class="num">03</span>Откройте PR и попросите коллегу проверить</summary>
+        <div class="step-body"><p>На GitHub откройте <b>Pull requests → New pull request</b>. Выберите <b>base</b> = <code>main</code> (куда вливаем) и <b>compare</b> = <code>feature/revenue</code> (откуда). Нажмите <b>Create pull request</b>.</p>
+          <p>В описании укажите, что изменилось и как это проверить. Например, «Два успешных платежа на 100 и 200 ₽ и один отказ на 50 ₽ дают выручку 300 ₽. Проверка — <code>uv run pytest tests/test_revenue.py</code>».</p>
+          <p>Борис открывает <b>Files changed</b> и смотрит, проверяет ли тест исключение отказов. Если понадобятся правки, Аня делает новый коммит в этой же ветке и выполняет <code>git push</code>. Изменения появятся в открытом PR.</p>
+        </div>
+      </details>
+      <details><summary><span class="num">04</span>Проверьте совместимость и выполните merge</summary>
+        <div class="step-body"><p>Когда коллега проверил изменения, замечания учтены и тесты проходят, нажмите в PR <b>Merge pull request → Confirm merge</b>. На схеме выбран вариант <b>Create a merge commit</b>. Кружок на <code>main</code> показывает, где сошлись две истории.</p>
+          <p>Если PR зависит от чужого кода, сначала влейте зависимость. Так делает Вера после слияния обеих метрик. С сохранёнными в коммите правками она обновляет свою ветку, подключает реальные расчёты и проверяет сводку целиком.</p>
+          <pre>git switch feature/summary
+git fetch origin
+git merge origin/main</pre>
+          <p>После подключения расчётов добавьте изменённые файлы через <code>git add</code>, сделайте коммит, запустите тесты и выполните <code>git push</code>. Коллега проверяет итоговый PR Веры перед слиянием.</p>
+          <details><summary>Что делать, если Git показал конфликт?</summary>
+            <div class="sub"><p>Оставайтесь в ветке задачи. Команда <code>git status</code> покажет спорные файлы. Откройте их и найдите блоки между <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, <code>=======</code> и <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>. Вместе с автором второй правки соберите нужную версию и удалите маркеры.</p>
+              <p>Например, если вы оба добавили показатель в одну строку сводки, проверьте, что в ней видны и выручка, и доля отказов. Для конфликта в <code>src/prime/summary.py</code> команды будут такими.</p>
+              <pre>git add src/prime/summary.py
+uv run pytest
+git commit -m "Объединить изменения сводки"
+git push</pre>
+            </div>
+          </details>
+        </div>
+      </details>
+      <details><summary><span class="num">05</span>Обновите main у себя</summary>
+        <div class="step-body"><p>После слияния на GitHub каждый у себя переключается на <code>main</code> и забирает изменения. В примере после последнего PR команда запускает тест сводки на трёх платежах и видит оба показателя. Следующую фичу начинайте от обновлённой <code>main</code>.</p>
+          <pre>git switch main
+git pull --ff-only
+uv run pytest</pre>
+          <p>Итоговый проект проверяется по <code>main</code> на момент отправки. Перед сдачей убедитесь, что нужные PR влиты, и каждый участник отправил ссылку на общий репозиторий через <code>/submit</code>.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+</main>
+<footer><div class="wrap"><span>Python для бизнес-аналитики · Итоговый проект</span><div><a href="https://docs.github.com/ru/get-started/using-github/github-flow">Работа через PR ↗</a><a href="https://docs.github.com/ru/pull-requests/how-tos/merge-and-close-pull-requests/resolving-a-merge-conflict-using-the-command-line">Конфликты в Git ↗</a></div></div></footer>
+<script>
+"use strict";
+const plot = document.getElementById("plot");
+
+function addMark(type, x, y, lane = "", stage = 0, label = "") {
+  const mark = document.createElement("span");
+  mark.className = [type, lane].join(" ");
+  mark.style.left = x + "%";
+  mark.style.top = y + "%";
+  mark.dataset.show = String(stage);
+  mark.textContent = label;
+  mark.setAttribute("aria-hidden", "true");
+  plot.append(mark);
+}
+
+addMark("node", 3.5, 19);
+addMark("plot-label start-tag", 4, 5, "", 0, "старт");
+for (const [lane, y, first, last, mergeX, mergeStage, pr] of [
+  ["anya", 42, 26, 48, 58.5, 3, "#1"],
+  ["boris", 65, 31, 57, 73, 3, "#2"],
+  ["vera", 88, 23, 51, 96.2, 4, "#3"]
+]) {
+  addMark("node", first, y, lane, 1);
+  addMark("node", last, y, lane, 1);
+  addMark("plot-label pr", last, y - 4, lane, 2, "PR " + pr);
+  plot.lastElementChild.dataset.until = lane === "vera" ? "3" : "2";
+  addMark("node join", mergeX, 19, lane, mergeStage);
+  addMark("plot-label", mergeX, 5, lane, mergeStage, "PR " + pr);
+  plot.lastElementChild.dataset.short = pr;
+}
+addMark("node join", 82.4, 88, "vera", 4);
+addMark("node", 87.2, 88, "vera", 4);
+
+const overview = ["Три задачи встречаются в main", "Сначала в main вливают две метрики. Пунктир показывает, как Вера забирает их в свою ветку. После проверки она вливает готовую сводку."];
+const stages = [
+  ["Один старт для троих", "Команда выбирает пример на три платежа и согласует формат данных. Каждый создаёт ветку задачи от одного коммита в свежей main. Пока ветки указывают на одну точку."],
+  ["Три задачи развиваются параллельно", "Аня проверяет сумму, Борис — долю отказов, Вера — текст сводки на известных значениях. Каждый сохраняет изменения и тесты коммитами в своей ветке."],
+  ["Коллеги открывают pull requests", "PR предлагает влить изменения в main. Борис проверяет Аню, Вера — Бориса, Аня смотрит шаблон Веры. Сводку пока рано вливать, ведь ей нужны обе метрики."],
+  ["Две независимые метрики попадают в main", "После ревью вливают PR #1 и #2. Их можно было влить и в обратном порядке. Код сводки всё ещё находится в отдельной ветке Веры."],
+  ["Сводка получает обе метрики", "Пунктир показывает, как Вера забирает свежую main к себе. Она подключает расчёты, проверяет 300 ₽ и 33,3 % на тестовых платежах. После ревью команда вливает PR #3."]
+];
+const caption = document.getElementById("map-caption");
+const description = document.getElementById("map-description");
+const back = document.getElementById("back");
+const next = document.getElementById("next");
+let stage = -1;
+
+function showStage(index) {
+  stage = index;
+  const visible = stage < 0 ? stages.length - 1 : stage;
+  for (const item of plot.querySelectorAll("[data-show]")) {
+    const show = visible >= Number(item.dataset.show) && (item.dataset.until === undefined || visible <= Number(item.dataset.until));
+    item.style.display = show ? "" : "none";
+  }
+  const [title, explanation] = stage < 0 ? overview : stages[stage];
+  caption.textContent = stage < 0 ? title : (stage + 1) + " / " + stages.length + " · " + title;
+  description.textContent = explanation;
+  plot.setAttribute("aria-label", title + ". " + explanation);
+  back.hidden = stage < 0;
+  back.textContent = stage === 0 ? "К обзору" : "← Назад";
+  next.textContent = stage < 0 ? "Разобрать по шагам →" : stage === stages.length - 1 ? "Вся схема" : "Дальше →";
+}
+back.addEventListener("click", () => { showStage(stage - 1); if (back.hidden) next.focus(); });
+next.addEventListener("click", () => showStage(stage < stages.length - 1 ? stage + 1 : -1));
+showStage(-1);
+
+const cases = [
+  {
+    question: "Я написала две функции для выручки. Коллега добавляет третью — отбор по дате только для этой метрики. Сколько веток взять?",
+    answer: 1, title: "Одна ветка и один PR для выручки.",
+    why: "Отбор дня, фильтр успешных платежей и сумма отвечают на один вопрос «Сколько заработали за этот день?». Проверьте три функции вместе на одном примере. Аня отправляет feature/revenue на GitHub. Коллега выполняет git fetch origin и git switch feature/revenue. Теперь оба могут добавлять в эту ветку свои коммиты. Договоритесь, кто какие строки меняет."
+  },
+  {
+    question: "Две мои функции считают выручку. Третья функция коллеги считает долю отказов по тем же платежам. Сколько веток взять?",
+    answer: 2, title: "Две ветки и два PR.",
+    why: "У каждой метрики свой результат и свой тест. Даже если доля отказов ещё не готова, команда уже может проверить и влить выручку. Общий источник данных сам по себе не связывает эти две задачи."
+  },
+  {
+    question: "Коллега закончил общий фильтр успешных платежей. Другим расчётам он тоже нужен. Моя новая метрика использует этот фильтр. Сколько веток взять?",
+    answer: 2, title: "Две ветки со своим порядком слияния.",
+    why: "Фильтр уже можно проверить отдельно. Сначала влейте его с тестом, затем обновите main и создайте ветку метрики. Если ветка метрики уже есть, влейте в неё origin/main после git fetch origin. Так фильтр попадёт в проект один раз."
+  }
+];
+const selectors = Array.from(document.querySelectorAll("[data-case]"));
+const answers = Array.from(document.querySelectorAll("[data-answer]"));
+const feedback = document.getElementById("feedback");
+let currentCase = 0;
+function selectCase(index) {
+  currentCase = index;
+  selectors.forEach((button, i) => button.setAttribute("aria-pressed", String(i === index)));
+  answers.forEach(button => button.setAttribute("aria-pressed", "false"));
+  document.getElementById("case-question").textContent = cases[index].question;
+  feedback.hidden = true;
+}
+selectors.forEach((button, index) => button.addEventListener("click", () => selectCase(index)));
+answers.forEach(button => button.addEventListener("click", () => {
+  const example = cases[currentCase];
+  const correct = Number(button.dataset.answer) === example.answer;
+  answers.forEach(answer => answer.setAttribute("aria-pressed", String(answer === button)));
+  document.getElementById("verdict").textContent = (correct ? "Да. " : "В этой ситуации удобнее иначе. ") + example.title;
+  document.getElementById("reason").textContent = example.why;
+  feedback.hidden = false;
+}));
+</script>
+</body>
+</html>
