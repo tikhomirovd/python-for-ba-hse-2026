@@ -119,6 +119,8 @@ CLAUDE.md
 # клона репозитория. Раздавать их в аудитории — потерянные двадцать минут.
 !02-среда-git-python/семинар/*.md
 !02-среда-git-python/семинар/*.ipynb
+!02-среда-git-python/семинар/git-conflict/
+!02-среда-git-python/семинар/git-conflict/revenue.py
 # !02-среда-git-python/лекция/**
 # !02-среда-git-python/семинар/**
 !03-pandas-модель-данных/лекция/*.pdf
