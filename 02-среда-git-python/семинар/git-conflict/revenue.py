@@ -5,7 +5,7 @@ from decimal import Decimal
 
 def revenue(payments: list[tuple[str, Decimal]]) -> Decimal:
     """Рассчитать выручку по парам (статус платежа, сумма в рублях)."""
-    return sum((amount for _, amount in payments), Decimal(0))
+    return sum((amount for status, amount in payments if status == "success"), Decimal(0))
 
 
 if __name__ == "__main__":
